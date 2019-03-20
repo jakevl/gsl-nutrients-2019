@@ -1,0 +1,90 @@
+# GSL water quality spatial variations {#wq-spatial}
+
+## WQ boxplots by site
+### Salinity
+```{r, sal-boxplot-site}
+sal_boxplot_site=
+	plot_ly(wq_data, x=~site_no) %>% 
+		add_trace(type='box', y=~Salinity_gL, name=~SiteName) %>% 
+		layout(title = "GSL salinity by site",
+			xaxis = list(title = "USGS site number"),
+			yaxis = list(side = 'left', title = 'Salinity (g/L)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+
+sal_boxplot_site
+
+```
+
+
+### Nutrients
+```{r, nut-boxplot-site}
+sal_boxplot_site=
+	plot_ly(wq_data, x=~site_no) %>% 
+		add_trace(type='box', y=~Total_phosphorus_mgL, name=~SiteName) %>% 
+		add_trace(type='box', y=~Filtered_phosphorus_mgL, name=~SiteName) %>% 
+		add_trace(type='box', y=~Total_nitrogen_mgL, name=~SiteName) %>% 
+		add_trace(type='box', y=~Filtered_nitrogen_mgL, name=~SiteName) %>% 
+		layout(title = "GSL water quality by site",
+			xaxis = list(title = "USGS site number"),
+			yaxis = list(side = 'left', title = 'Daily discharge (cfs)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+
+sal_boxplot_site
+
+```
+
+
+
+### Chlorophyll a
+```{r, wq-boxplot-site}
+sal_boxplot_site=
+	plot_ly(wq_data, x=~site_no) %>% 
+		add_trace(type='box', y=~Salinity_gL, name=~SiteName) %>% 
+		add_trace(type='box', y=~Total_phosphorus_mgL, name=~SiteName) %>% 
+		add_trace(type='box', y=~Filtered_phosphorus_mgL, name=~SiteName) %>% 
+		add_trace(type='box', y=~Filtered_nitrogen_mgL, name=~SiteName) %>% 
+		add_trace(type='box', y=~Total_nitrogen_mgL, name=~SiteName) %>% 
+		add_trace(type='box', y=~Chlorophyll_a_ugL, name=~SiteName) %>% 
+		layout(title = "GSL water quality by site",
+			xaxis = list(title = "USGS site number"),
+			yaxis = list(side = 'left', title = 'Daily discharge (cfs)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+
+sal_boxplot_site
+
+```
+
+## WQ map
+```{r, wq-map}
+```
+
+
+
+

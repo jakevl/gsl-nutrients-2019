@@ -1,0 +1,44 @@
+# Export html widgets and plotly API files
+```{r, export-widgets}
+
+site_map$width='600px'
+site_map$height='600px'
+htmlwidgets::saveWidget(site_map, file=paste0(getwd(),"/htmlwidgets/01-site_map.html"), title="Site locations")
+
+
+elev_plot$width='1000px'
+htmlwidgets::saveWidget(elev_plot, file=paste0(getwd(),"/htmlwidgets/02-elev_plot.html"), title="GSL water surface elevation")
+#api_create(elev_plot, filename="gsl-elevation-plot")
+
+
+disch_boxplot$width='1000px'
+htmlwidgets::saveWidget(disch_boxplot, file=paste0(getwd(),"/htmlwidgets/03-disch_boxplot.html"), title="GSL tributary daily discharge")
+#api_create(disch_boxplot, filename="gsl-trib-disch-boxplot")
+
+
+disch_ts$width='1000px'
+htmlwidgets::saveWidget(disch_ts, file=paste0(getwd(),"/htmlwidgets/04-disch_ts.html"), title="GSL tributary daily discharge")
+#api_create(disch_ts, filename="gsl-trib-disch-timeseries")
+
+
+mon_inflow$width='1000px'
+htmlwidgets::saveWidget(mon_inflow, file=paste0(getwd(),"/htmlwidgets/05-mon_inflow.html"), title="GSL tributary monthly inflow")
+#api_create(mon_inflow, filename="gsl-monthly-inflow")
+
+
+gsl_sal_ts$width='1000px'
+#api_create(gsl_sal_ts, filename="gsl-salinity-timeseries")
+htmlwidgets::saveWidget(gsl_sal_ts, file=paste0(getwd(),"/htmlwidgets/06-gsl_sal_ts.html"), title="GSL salinity")
+
+
+gsl_nuts_ts$width='1000px'
+#api_create(gsl_nuts_ts, filename="gsl-nutrient-timeseries")
+htmlwidgets::saveWidget(gsl_nuts_ts, file=paste0(getwd(),"/htmlwidgets/07-gsl_nuts_ts.html"), title="GSL nutrients")
+
+
+gsl_chl_ts$width='1000px'
+#api_create(gsl_chl_ts, filename="gsl-chla-timeseries")
+htmlwidgets::saveWidget(gsl_chl_ts, file=paste0(getwd(),"/htmlwidgets/08-gsl_chl_ts.html"), title="GSL chlorophyll a")
+
+```
+

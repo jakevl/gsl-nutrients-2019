@@ -1,0 +1,11 @@
+--- 
+title: "Great Salt Lake Nutrient Analyses"
+author: "Jake Vander Laan, Utah Division of Water Quality"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+output: bookdown::gitbook
+documentclass: book
+---
+
+# Introduction {-}
+

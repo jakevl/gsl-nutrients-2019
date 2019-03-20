@@ -1,0 +1,119 @@
+# Tributary discharge {#trib-disch-analyses}
+
+## Add site metadata
+```{r, disch-site-merge}
+discharge=merge(discharge, site_list, by.x="site_no", by.y="SiteNumber", all.x=T)
+```
+
+## Aggregate to daily & monthly mean values
+```{r, agg-disch}
+discharge$date=as.Date(discharge$dateTime, format="%Y-%m-%d")
+daily_disch=aggregate(discharge_cfs~site_no+SiteName+date, data=discharge, FUN='mean')
+daily_disch=within(daily_disch,{
+	year=lubridate::year(date)
+	month=lubridate::month(date)
+	days_in_month=lubridate::days_in_month(date)
+})
+
+monthly_disch=aggregate(discharge_cfs~site_no+SiteName+month+year+days_in_month, data=daily_disch, FUN='mean')
+names(monthly_disch)[names(monthly_disch)=="discharge_cfs"]="mean_monthly_disch_cfs"
+```
+
+## Calculate monthly inflow totals
+```{r, calc-mon-inflow}
+monthly_disch=within(monthly_disch, {
+	monthly_inflow_af=mean_monthly_disch_cfs*days_in_month*86400/43559.9
+	yr_mo=as.Date(paste(monthly_disch$year,monthly_disch$month,"01",sep="-"), format="%Y-%m-%d")
+})
+
+```
+
+## Boxplot by site
+```{r, disch-boxplot}
+disch_boxplot=
+	plot_ly(daily_disch, x=~site_no, y=~discharge_cfs, type='box', name=~SiteName) %>% 
+		layout(title = "GSL tributary discharge",
+			xaxis = list(title = "USGS site number"),
+			yaxis = list(side = 'left', title = 'Daily discharge (cfs)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+
+disch_boxplot
+```
+
+
+## Daily discharge time series
+```{r, disch-time-series}
+
+disch_ts=
+	plot_ly(daily_disch, x=~date) %>%
+		add_lines(y=~discharge_cfs, x=~date, name=~SiteName) %>% 
+		layout(title = "GSL tributary daily discharge",
+			xaxis = list(title = ""),
+			yaxis = list(side = 'left', title = 'Daily discharge (cfs)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+disch_ts
+```
+
+
+## Monthly water inflow
+
+```{r, disch-month}
+mon_inflow=
+	plot_ly(monthly_disch, x=~yr_mo) %>%
+		add_lines(y=~monthly_inflow_af, x=~yr_mo, name=~SiteName) %>% 
+		layout(title = "GSL tributary monthly inflow",
+			xaxis = list(title = ""),
+			yaxis = list(side = 'left', title = 'Monthly inflow (acre-feet)')
+		) %>% 
+		config(displaylogo = FALSE, collaborate = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+mon_inflow
+
+```
+
+
+## Annual inflow to Gilbert Bay
+```{r, disch-ann}
+table(unique(monthly_disch[,c("month","year")]))
+ann_disch=aggregate(monthly_inflow_af~site_no+SiteName+year, monthly_disch, FUN='sum')
+ann_disch=ann_disch[ann_disch$year<2019 & ann_disch$site_no!=10126000,]
+names(ann_disch)[names(ann_disch)=="monthly_inflow_af"]="ann_inflow_af"
+ann_disch_mean=aggregate(ann_inflow_af~site_no+SiteName, ann_disch, FUN='mean')
+sum(ann_disch_mean$ann_inflow_af)
+
+```
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,9 @@
+# Package installs {#packages}
+```{r}
+#install.packages(c("dataRetrieval","dplyr","DT", "devtools"))
+#devtools::install_github("utah-dwq/wqTools")
+library(wqTools)
+library(magrittr)
+library(plotly)
+```
+

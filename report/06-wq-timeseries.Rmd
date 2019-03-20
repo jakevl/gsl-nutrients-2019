@@ -1,0 +1,131 @@
+# GSL water quality timeseries {#wq-timeseries}
+
+```{r, echo=F}
+cols=list(
+	list('rgba(60, 230, 70, 0.5)','rgb(60, 230, 70)'),
+	list('rgba(230, 200, 50, 0.5)','rgb(230, 200, 50)'),
+	list('rgba(30, 50, 195, 0.5)','rgb(30, 50, 195)'),
+	list('rgba(200, 30, 30, 0.5)','rgb(200, 30, 30)'),
+	list('rgba(195, 30, 200, 0.5)','rgb(195, 30, 200)')
+	)
+```
+
+
+## Salinity
+```{r, salinity-ts}
+gsl_sal_ts=
+	plot_ly(data=wq_data, x=~sample_dt) %>%
+		add_markers(data=wq_data[wq_data$rel_depth=="Bottom",], x=~sample_dt, y=~Salinity_gL, name="Bottom", visible=T,
+			marker = list(color = cols[[1]][[1]],size = 10,line = list(color = cols[[1]][[2]],width = 2))
+		) %>% 
+		add_markers(data=wq_data[wq_data$rel_depth=="Surface",], x=~sample_dt, y=~Salinity_gL, name="Surface", visible=T, 
+			marker = list(symbol=2, color = cols[[2]][[1]],size = 10,line = list(color = cols[[2]][[2]],width = 2))
+		) %>%
+		layout(
+			title = "GSL salinity timeseries",
+			xaxis = list(title = ""),
+			yaxis = list(side = 'left', title = 'Concentration (g/L)')
+		) %>% 
+		config(displaylogo = FALSE, collaborate = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+
+gsl_sal_ts	
+```
+
+
+
+## Nutrients
+```{r, nutrient-ts}
+gsl_nuts_ts=
+	plot_ly(data=wq_data, x=~sample_dt) %>%
+		add_markers(data=wq_data[wq_data$rel_depth=="Bottom",], x=~sample_dt, y=~Total_phosphorus_mgL, name="Total/bottom", visible=T, 
+			marker = list(symbol=2, color = cols[[2]][[1]],size = 10,line = list(color = cols[[2]][[2]],width = 2))) %>%
+		add_markers(data=wq_data[wq_data$rel_depth=="Surface",], x=~sample_dt, y=~Total_phosphorus_mgL, name="Total/surface", visible=T, 
+			marker = list(color = cols[[1]][[1]],size = 10,line = list(color = cols[[1]][[2]],width = 2))) %>%
+		add_markers(data=wq_data[wq_data$rel_depth=="Bottom",], x=~sample_dt, y=~Filtered_phosphorus_mgL, name="Filtered/bottom", visible="legendonly", 
+			marker = list(symbol=5, color = cols[[4]][[1]],size = 10,line = list(color = cols[[4]][[2]],width = 2))) %>%
+		add_markers(data=wq_data[wq_data$rel_depth=="Surface",], x=~sample_dt, y=~Filtered_phosphorus_mgL, name="Filtered/surface", visible="legendonly", 
+			marker = list(symbol=20, color = cols[[3]][[1]],size = 10,line = list(color = cols[[3]][[2]],width = 2))) %>%
+		
+		add_markers(data=wq_data[wq_data$rel_depth=="Bottom",], x=~sample_dt, y=~Total_nitrogen_mgL, name="Total/bottom", visible=F, 
+			marker = list(symbol=2, color = cols[[2]][[1]],size = 10,line = list(color = cols[[2]][[2]],width = 2))) %>%
+		add_markers(data=wq_data[wq_data$rel_depth=="Surface",], x=~sample_dt, y=~Total_nitrogen_mgL, name="Total/surface", visible=F, 
+			marker = list(color = cols[[1]][[1]],size = 10,line = list(color = cols[[1]][[2]],width = 2))) %>%
+		add_markers(data=wq_data[wq_data$rel_depth=="Bottom",], x=~sample_dt, y=~Filtered_nitrogen_mgL, name="Filtered/bottom", visible=F, 
+			marker = list(symbol=5, color = cols[[4]][[1]],size = 10,line = list(color = cols[[4]][[2]],width = 2))) %>%
+		add_markers(data=wq_data[wq_data$rel_depth=="Surface",], x=~sample_dt, y=~Filtered_nitrogen_mgL, name="Filtered/surface", visible=F, 
+			marker = list(symbol=20, color = cols[[3]][[1]],size = 10,line = list(color = cols[[3]][[2]],width = 2))) %>%
+		
+		layout(
+			title = "GSL nutrient timeseries",
+			xaxis = list(title = ""),
+			yaxis = list(side = 'left', title = 'Concentration (mg/L)'),
+			updatemenus = list(
+				list(
+					type='dropdown',
+					yanchor = 'auto',
+					buttons = list(
+						list(label="Phosphorus",
+							method = "restyle",
+							args = list('visible', list(T,T,"legendonly","legendonly",F,F,F,F))),					
+						list(label = 'Nitrogen',
+							method = "restyle",
+							args = list('visible', list(F,F,F,F,T,T,"legendonly","legendonly")))
+					)
+				)
+			)
+		) %>% 
+		config(displaylogo = FALSE, collaborate = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+
+gsl_nuts_ts
+
+```
+
+
+## Chlorophyll a
+```{r, chla-ts}
+gsl_chl_ts=
+	plot_ly(data=wq_data, x=~sample_dt) %>%
+		add_markers(data=wq_data[wq_data$rel_depth=="Bottom",], x=~sample_dt, y=~Chlorophyll_a_ugL, name="Bottom", visible=T, 
+			marker = list(symbol=2, color = cols[[2]][[1]],size = 10,line = list(color = cols[[2]][[2]],width = 2))) %>%
+		add_markers(data=wq_data[wq_data$rel_depth=="Surface",], x=~sample_dt, y=~Chlorophyll_a_ugL, name="Surface", visible=T, 
+			marker = list(color = cols[[1]][[1]],size = 10,line = list(color = cols[[1]][[2]],width = 2))) %>% 
+		layout(
+			title = "GSL chlorophyll a timeseries",
+			xaxis = list(title = ""),
+			yaxis = list(side = 'left', title = 'Concentration (ug/L)')
+		) %>% 
+		config(displaylogo = FALSE, collaborate = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+
+gsl_chl_ts	
+```
+
+
+
+
+
+
+

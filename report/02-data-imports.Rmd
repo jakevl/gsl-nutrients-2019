@@ -1,0 +1,90 @@
+# Import data sources {#data-imports}
+
+## Site list
+```{r, read-site-list}
+site_list=read.csv(file="site_list.csv")
+DT::datatable(site_list, rownames=FALSE, filter="top",
+			options = list(scrollY = '600px', paging = FALSE, scrollX=TRUE, dom="ltipr")
+)
+```
+
+## Lake elevation
+```{r, read-elev, cache=T}
+elevation=dataRetrieval::readNWISdv(siteNumbers=site_list$SiteNumber[site_list$SiteType=="Elevation gauge"],parameterCd="62614")
+elevation=dplyr::rename(elevation, elev_ft=X_62614_00003)
+```
+
+## Tributary discharge
+
+### Read discharge gauges
+```{r, read-discharge, cache=T}
+discharge=dataRetrieval::readNWISuv(siteNumbers=site_list$SiteNumber[site_list$SiteType=="Discharge gauge"],parameterCd="00060", tz="America/Denver", startDate = "2010-01-01", endDate = "2018-12-31")
+discharge=dplyr::rename(discharge, discharge_cfs=X_00060_00000, )
+summary(discharge)
+```
+
+### Estimate BRB discharge from Corinne site
+```{r, est-brb-dis}
+brb_dis=discharge[discharge$site_no==10126000,]
+brb_dis$site_no=10010060
+brb_dis$discharge_cfs=83.0813+1.0958*brb_dis$discharge_cfs
+discharge=rbind(discharge,brb_dis)
+```
+
+## Lake & tributary water quality data
+
+```{r, read-wq, cache=T}
+wq_data=dataRetrieval::readNWISqw(startDate="01-01-2010", endDate="12-31-2018",expanded=F,tz="America/Denver",
+		siteNumbers=site_list$SiteNumber[site_list$SiteType %in% c("Lake", "Discharge gauge", "Causeway breach")],
+		parameterCd=c(
+			"00098",			
+			"00665",
+			"00666",
+			"32209",
+			"62854",
+			"62855",
+			"70305")
+)
+
+wq_data=dplyr::rename(wq_data,
+	Sampling_depth_m=p00098,
+	Total_phosphorus_mgL=p00665,
+	Filtered_phosphorus_mgL=p00666,
+	Chlorophyll_a_ugL=p32209,
+	Filtered_nitrogen_mgL=p62854,
+	Total_nitrogen_mgL=p62855,
+	Salinity_gL=p70305)
+
+
+```
+
+
+```{r, rel-depth}
+## Define surface and bottom samples
+wq_data=within(wq_data,{
+	rel_depth=NA
+	rel_depth[Sampling_depth_m<=1]="Surface"
+	rel_depth[Sampling_depth_m>=4]="Bottom"
+})
+```
+
+
+## Read site locations
+```{r, read-sites, cache=T}
+sites=dataRetrieval::readNWISsite(siteNumbers=site_list$SiteNumber)
+```
+
+## Add site metadata to site locations
+```{r, site-metadata}
+sites=dataRetrieval::readNWISsite(siteNumbers=site_list$SiteNumber)
+sites=merge(sites,site_list, by.x=c("site_no","station_nm"), by.y=c("SiteNumber","SiteName"))
+```
+
+## Add site metadata to WQ data
+```{r, site-metadata-wq}
+wq_data=merge(wq_data,site_list, by.x="site_no", by.y="SiteNumber", all.x=T)
+```
+
+
+
+

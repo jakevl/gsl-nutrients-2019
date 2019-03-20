@@ -1,0 +1,24 @@
+# GSL Elevation {#elev-analyses}
+
+```{r, elev-plot}
+elevation=merge(elevation, site_list, by.x="site_no", by.y="SiteNumber", all.x=T)
+
+elev_plot=
+	plot_ly(elevation, x=~Date) %>%
+		add_lines(y=~elev_ft, x=~Date, name=~Bay) %>%
+		layout(title = "GSL Water surface elevation",
+			xaxis = list(title = ""),
+			yaxis = list(side = 'left', title = 'Elevation (ft)')
+		) %>% 
+		config(displaylogo = FALSE, collaborate = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+elev_plot
+```
+

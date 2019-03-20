@@ -1,0 +1,13 @@
+# Site map {#site-map}
+```{r, site-map}
+sites=within(sites, {
+	LatitudeMeasure=dec_lat_va
+	LongitudeMeasure=dec_long_va
+	MonitoringLocationTypeName=SiteType
+	MonitoringLocationIdentifier=site_no
+	MonitoringLocationName=station_nm
+})
+site_map=buildMap(sites=sites, plot_polys=F, search="")
+site_map=leaflet::fitBounds(site_map, lng1=min(sites$LongitudeMeasure), lng2=max(sites$LongitudeMeasure), lat1=min(sites$LatitudeMeasure), lat2=max(sites$LatitudeMeasure))
+site_map
+```
