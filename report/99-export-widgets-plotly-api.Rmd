@@ -47,8 +47,8 @@ htmlwidgets::saveWidget(gsl_chl_ts, file=paste0(getwd(),"/htmlwidgets/10-gsl_chl
 chla_boxplot_month$width='1000px'
 htmlwidgets::saveWidget(chla_boxplot_month, file=paste0(getwd(),"/htmlwidgets/11-chla_boxplot_month.html"), title="GSL chlorophyll a")
 
-sal_boxplot_site$width='1000px'
-htmlwidgets::saveWidget(sal_boxplot_site, file=paste0(getwd(),"/htmlwidgets/12-sal_boxplot_bay.html"), title="GSL salinity by bay")
+sal_boxplot_bay$width='1000px'
+htmlwidgets::saveWidget(sal_boxplot_bay, file=paste0(getwd(),"/htmlwidgets/12-sal_boxplot_bay.html"), title="GSL salinity by bay")
 
 nuts_boxplot_bay$width='1000px'
 htmlwidgets::saveWidget(nuts_boxplot_bay, file=paste0(getwd(),"/htmlwidgets/13-nuts_boxplot_bay.html"), title="GSL nutrients by bay")
