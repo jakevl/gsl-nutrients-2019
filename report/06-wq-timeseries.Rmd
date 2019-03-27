@@ -10,8 +10,30 @@ cols=list(
 	)
 ```
 
+## Create flat data (for certain boxplots)
+```{r, wq-flatten}
+
+wq_data_flat=reshape2::melt(wq_data, id.vars=c("site_no", "station_nm", "Bay", "sample_dt", "sample_tm", "rel_depth", "Sampling_depth_m","dec_lat_va","dec_long_va", "month"),
+							measure.vars=c("Salinity_gL", "Chlorophyll_a_ugL", "Total_phosphorus_mgL","Filtered_phosphorus_mgL","Filtered_nitrogen_mgL","Total_nitrogen_mgL", "TN_TP","FN_FP"))
+
+wq_data_flat=wq_data_flat[!is.na(wq_data_flat$Bay) & !is.na(wq_data_flat$rel_depth),]
+wq_data_flat=within(wq_data_flat,{
+	bay_depth=paste(Bay,rel_depth)
+	param=gsub("_", " ", variable)
+	param=gsub("ugL", " ", param)
+	param=gsub("mgL", " ", param)
+	param=gsub("gL", " ", param)
+	param=gsub("  ", "", param)
+	param[variable=="TN_TP"]="TN:TP (molar)"
+	param[variable=="FN_FP"]="FN:FP (molar)"
+	bay_depth=paste(Bay,rel_depth)
+})
+
+```
+
 
 ## Salinity
+### Time series
 ```{r, salinity-ts}
 gsl_sal_ts=
 	plot_ly(data=wq_data, x=~sample_dt) %>%
@@ -39,9 +61,33 @@ gsl_sal_ts=
 gsl_sal_ts	
 ```
 
+### Seasonal
+```{r, sal-seasonal}
+sal_boxplot_month=
+	plot_ly(wq_data[!is.na(wq_data$rel_depth),], x=~month) %>% 
+		add_trace(type='box', y=~Salinity_gL, color=~rel_depth) %>% 
+		layout(title = "GSL salinity by month",
+			boxmode = "group",
+			xaxis = list(title = "Month"),
+			yaxis = list(side = 'left', title = 'Salinity (g/L)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+
+sal_boxplot_month
+```
 
 
 ## Nutrients
+
+### Time series
 ```{r, nutrient-ts}
 gsl_nuts_ts=
 	plot_ly(data=wq_data, x=~sample_dt) %>%
@@ -63,21 +109,38 @@ gsl_nuts_ts=
 		add_markers(data=wq_data[wq_data$rel_depth=="Surface",], x=~sample_dt, y=~Filtered_nitrogen_mgL, name="Filtered/surface", visible=F, 
 			marker = list(symbol=20, color = cols[[3]][[1]],size = 10,line = list(color = cols[[3]][[2]],width = 2))) %>%
 		
+		add_markers(data=wq_data[wq_data$rel_depth=="Bottom",], x=~sample_dt, y=~TN_TP, name="Total/bottom", visible=F, 
+			marker = list(symbol=2, color = cols[[2]][[1]],size = 10,line = list(color = cols[[2]][[2]],width = 2))) %>%
+		add_markers(data=wq_data[wq_data$rel_depth=="Surface",], x=~sample_dt, y=~TN_TP, name="Total/surface", visible=F, 
+			marker = list(color = cols[[1]][[1]],size = 10,line = list(color = cols[[1]][[2]],width = 2))) %>%
+		add_markers(data=wq_data[wq_data$rel_depth=="Bottom",], x=~sample_dt, y=~FN_FP, name="Filtered/bottom", visible=F, 
+			marker = list(symbol=5, color = cols[[4]][[1]],size = 10,line = list(color = cols[[4]][[2]],width = 2))) %>%
+		add_markers(data=wq_data[wq_data$rel_depth=="Surface",], x=~sample_dt, y=~FN_FP, name="Filtered/surface", visible=F, 
+			marker = list(symbol=20, color = cols[[3]][[1]],size = 10,line = list(color = cols[[3]][[2]],width = 2))) %>%
+		
+		
 		layout(
 			title = "GSL nutrient timeseries",
 			xaxis = list(title = ""),
 			yaxis = list(side = 'left', title = 'Concentration (mg/L)'),
 			updatemenus = list(
 				list(
-					type='dropdown',
-					yanchor = 'auto',
 					buttons = list(
-						list(label="Phosphorus",
-							method = "restyle",
-							args = list('visible', list(T,T,"legendonly","legendonly",F,F,F,F))),					
-						list(label = 'Nitrogen',
-							method = "restyle",
-							args = list('visible', list(F,F,F,F,T,T,"legendonly","legendonly")))
+						list(method = "update",
+							args = list(list(visible = list(T,T,"legendonly","legendonly",F,F,F,F,F,F,F,F)),
+										list(yaxis = list(side = 'left', title = 'Phosphorus (mg/L)'))
+							),
+							label = "Phosphorus"),						
+						list(method = "update",
+							args = list(list(visible = list(F,F,F,F,T,T,"legendonly","legendonly",F,F,F,F)),
+										list(yaxis = list(side = 'left', title = 'Nitrogen (mg/L)'))
+							),
+							label = "Nitrogen"),						
+						list(method = "update",
+							args = list(list(visible = list(F,F,F,F,F,F,F,F,T,T,"legendonly","legendonly")),
+										list(yaxis = list(side = 'left', title = 'N:P ratio (molar)'))
+							),
+							label = "N:P ratio")
 					)
 				)
 			)
@@ -93,11 +156,66 @@ gsl_nuts_ts=
 		)
 
 gsl_nuts_ts
+```
+
+
+
+### Seasonal
+```{r, nutrient-seasonal}
+nuts_data_flat=wq_data_flat[wq_data_flat$variable %in% c("Total_phosphorus_mgL","Filtered_phosphorus_mgL","Filtered_nitrogen_mgL","Total_nitrogen_mgL","FN_FP","TN_TP"),]
+nit_flat=nuts_data_flat[nuts_data_flat$param=="Total nitrogen" | nuts_data_flat$param=="Filtered nitrogen",]
+phos_flat=nuts_data_flat[nuts_data_flat$param=="Total phosphorus" | nuts_data_flat$param=="Filtered phosphorus",]
+np_flat=nuts_data_flat[nuts_data_flat$param=="FN:FP (molar)" | nuts_data_flat$param=="TN:TP (molar)",]
+
+
+
+nuts_boxplot_month=
+	plot_ly(nuts_data_flat, x=~month) %>% 
+		add_boxplot(data=phos_flat, y=~value, color=~param, visible=T) %>% 
+		add_boxplot(data=nit_flat, y=~value, color=~param, visible="legendonly") %>% 
+		add_boxplot(data=np_flat, y=~value, color=~param, visible="legendonly") %>% 
+		layout(title = "GSL nutrients by month",
+			xaxis = list(title = "Month"),
+			yaxis = list(side = 'left', type = "log", title = 'Concentration (mg/L)'),
+			boxmode = "group",
+			updatemenus = list(
+				list(
+					buttons = list(
+						list(method = "update",
+							args = list(list(visible = list(T,T,"legendonly","legendonly",F,F)),
+										list(yaxis = list(side = 'left', type = "log", title = 'Concentration (mg/L)'))
+							),
+							label = "Phosphorus"),						
+						list(method = "update",
+							args = list(list(visible = list("legendonly","legendonly",T,T,F,F)),
+										list(yaxis = list(side = 'left', type = "log", title = 'Concentration (mg/L)'))
+							),
+							label = "Nitrogen"),						
+						list(method = "update",
+							args = list(list(visible = list(F,F,F,F,T,T)),
+										list(yaxis = list(side = 'left', type = "log", title = 'N:P ratio (molar)'))
+							),
+							label = "N:P ratio")
+					)
+				)
+			)
+ 		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+nuts_boxplot_month
 
 ```
 
 
 ## Chlorophyll a
+### Time series
 ```{r, chla-ts}
 gsl_chl_ts=
 	plot_ly(data=wq_data, x=~sample_dt) %>%
@@ -123,6 +241,28 @@ gsl_chl_ts=
 gsl_chl_ts	
 ```
 
+### Seasonal
+```{r, chla-seasonal}
+
+chla_boxplot_month=
+	plot_ly(wq_data, x=~month) %>% 
+		add_trace(type='box', y=~Chlorophyll_a_ugL) %>% 
+		layout(title = "GSL chlorophyll a by month",
+			xaxis = list(title = "Month", range=c(1,12)),
+			yaxis = list(side = 'left', type = "log", title = 'Concentration (ug/L)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+chla_boxplot_month
+
+```
 
 
 

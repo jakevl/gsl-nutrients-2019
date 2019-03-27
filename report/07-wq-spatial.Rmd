@@ -1,13 +1,15 @@
 # GSL water quality spatial variations {#wq-spatial}
 
+
 ## WQ boxplots by site
 ### Salinity
-```{r, sal-boxplot-site}
-sal_boxplot_site=
-	plot_ly(wq_data, x=~site_no) %>% 
-		add_trace(type='box', y=~Salinity_gL, name=~SiteName) %>% 
-		layout(title = "GSL salinity by site",
-			xaxis = list(title = "USGS site number"),
+```{r, sal-boxplot-bay}
+sal_boxplot_bay=
+	plot_ly(wq_data[!is.na(wq_data$rel_depth),], x=~Bay) %>% 
+		add_trace(type='box', y=~Salinity_gL, color=~rel_depth) %>% 
+		layout(title = "GSL salinity by bay",
+			boxmode = "group",
+			xaxis = list(title = "GSL bay"),
 			yaxis = list(side = 'left', title = 'Salinity (g/L)')
 		) %>% 
 		config(displaylogo = FALSE,
@@ -20,23 +22,43 @@ sal_boxplot_site=
 			)
 		)
 
-sal_boxplot_site
+sal_boxplot_bay
 
 ```
 
-
 ### Nutrients
-```{r, nut-boxplot-site}
-sal_boxplot_site=
-	plot_ly(wq_data, x=~site_no) %>% 
-		add_trace(type='box', y=~Total_phosphorus_mgL, name=~SiteName) %>% 
-		add_trace(type='box', y=~Filtered_phosphorus_mgL, name=~SiteName) %>% 
-		add_trace(type='box', y=~Total_nitrogen_mgL, name=~SiteName) %>% 
-		add_trace(type='box', y=~Filtered_nitrogen_mgL, name=~SiteName) %>% 
-		layout(title = "GSL water quality by site",
-			xaxis = list(title = "USGS site number"),
-			yaxis = list(side = 'left', title = 'Daily discharge (cfs)')
-		) %>% 
+```{r, nuts-boxplot-bay}
+nuts_boxplot_bay=
+	plot_ly(nuts_data_flat, x=~bay_depth) %>% 
+		add_boxplot(data=phos_flat, y=~value, color=~param, visible=T) %>% 
+		add_boxplot(data=nit_flat, y=~value, color=~param, visible="legendonly") %>% 
+		add_boxplot(data=np_flat, y=~value, color=~param, visible="legendonly") %>% 
+		layout(title = "GSL nutrients by bay",
+			xaxis = list(title = "GSL bay"),
+			yaxis = list(side = 'left', type = "log", title = 'Concentration (mg/L)'),
+			boxmode = "group",
+			updatemenus = list(
+				list(
+					buttons = list(
+						list(method = "update",
+							args = list(list(visible = list(T,T,"legendonly","legendonly",F,F)),
+										list(yaxis = list(side = 'left', type = "log", title = 'Concentration (mg/L)'))
+							),
+							label = "Phosphorus"),						
+						list(method = "update",
+							args = list(list(visible = list("legendonly","legendonly",T,T,F,F)),
+										list(yaxis = list(side = 'left', type = "log", title = 'Concentration (mg/L)'))
+							),
+							label = "Nitrogen"),						
+						list(method = "update",
+							args = list(list(visible = list(F,F,F,F,T,T)),
+										list(yaxis = list(side = 'left', type = "log", title = 'N:P ratio (molar)'))
+							),
+							label = "N:P ratio")
+					)
+				)
+			)
+ 		) %>% 
 		config(displaylogo = FALSE,
 			modeBarButtonsToRemove = c(
 				'sendDataToCloud',
@@ -46,26 +68,20 @@ sal_boxplot_site=
 				'select2d'
 			)
 		)
+nuts_boxplot_bay
 
-sal_boxplot_site
 
 ```
-
 
 
 ### Chlorophyll a
-```{r, wq-boxplot-site}
-sal_boxplot_site=
-	plot_ly(wq_data, x=~site_no) %>% 
-		add_trace(type='box', y=~Salinity_gL, name=~SiteName) %>% 
-		add_trace(type='box', y=~Total_phosphorus_mgL, name=~SiteName) %>% 
-		add_trace(type='box', y=~Filtered_phosphorus_mgL, name=~SiteName) %>% 
-		add_trace(type='box', y=~Filtered_nitrogen_mgL, name=~SiteName) %>% 
-		add_trace(type='box', y=~Total_nitrogen_mgL, name=~SiteName) %>% 
-		add_trace(type='box', y=~Chlorophyll_a_ugL, name=~SiteName) %>% 
-		layout(title = "GSL water quality by site",
-			xaxis = list(title = "USGS site number"),
-			yaxis = list(side = 'left', title = 'Daily discharge (cfs)')
+```{r, chla-boxplot-bay}
+chla_boxplot_bay=
+	plot_ly(wq_data, x=~Bay) %>% 
+		add_trace(type='box', y=~Chlorophyll_a_ugL) %>% 
+		layout(title = "GSL chlorophyll a by bay",
+			xaxis = list(title = "GSL bay"),
+			yaxis = list(side = 'left', type = "log", title = 'Concentration (ug/L)')
 		) %>% 
 		config(displaylogo = FALSE,
 			modeBarButtonsToRemove = c(
@@ -76,14 +92,107 @@ sal_boxplot_site=
 				'select2d'
 			)
 		)
-
-sal_boxplot_site
-
+chla_boxplot_bay
 ```
 
-## WQ map
+## WQ map (surface samples)
 ```{r, wq-map}
+
+np_flat=np_flat[,names(np_flat) %in% names(wq_data_flat)]
+np_flat$variable=gsub(":","_",np_flat$param)
+np_flat$variable=gsub(" (molar)","",np_flat$variable, fixed=TRUE)
+wq_data_flat=rbind(wq_data_flat,np_flat)
+
+wq_data_flat_mean=aggregate(value~site_no+station_nm+Bay+rel_depth+dec_lat_va+dec_long_va+variable+param+bay_depth, wq_data_flat, FUN='mean')
+wq_map_data=wq_data_flat_mean[wq_data_flat_mean$rel_depth=="Surface",]
+
+wq_map_data=reshape2::dcast(wq_map_data, site_no+station_nm+Bay+rel_depth+dec_lat_va+dec_long_va+bay_depth~variable, value.var='value')
+
+library(leaflet)
+
+gsl_poly=wqTools::au_poly
+gsl_poly=with(gsl_poly, {gsl_poly[AU_NAME=="Gilbert Bay" | AU_NAME=="Farmington Bay" | AU_NAME=="Bear River Bay",]})
+
+calcRadius=function(x, min=5, max=25){return(scales::rescale(x, to=c(min,max)))}
+
+wq_map=
+leaflet(gsl_poly) %>%
+	addProviderTiles("Esri.WorldTopoMap", group = "Topo") %>%
+	addPolygons(data=gsl_poly, fillOpacity = 0.1,weight=3,color="lightskyblue") %>%
+	addCircleMarkers(lat=wq_map_data$dec_lat_va, lng=wq_map_data$dec_long_va, radius=calcRadius(wq_map_data$Salinity_gL),
+		color=~colorNumeric(palette = c("green", "red"), domain = wq_map_data$Salinity_gL)(wq_map_data$Salinity_gL), group='Salinity (g/L)') %>%
+		
+	addCircleMarkers(lat=wq_map_data$dec_lat_va, lng=wq_map_data$dec_long_va, radius=calcRadius(wq_map_data$Chlorophyll_a_ugL),
+		color=~colorNumeric(palette = c("green", "red"), domain = wq_map_data$Chlorophyll_a_ugL)(wq_map_data$Chlorophyll_a_ugL), group='Chlorophyll a (ug/L)') %>%
+		
+	addCircleMarkers(lat=wq_map_data$dec_lat_va, lng=wq_map_data$dec_long_va, radius=calcRadius(wq_map_data$Total_phosphorus_mgL),
+		color=~colorNumeric(palette = c("green", "red"), domain = wq_map_data$Total_phosphorus_mgL)(wq_map_data$Total_phosphorus_mgL), group='Total phosphorus (mg/L)') %>%
+		
+	addCircleMarkers(lat=wq_map_data$dec_lat_va, lng=wq_map_data$dec_long_va, radius=calcRadius(wq_map_data$Filtered_phosphorus_mgL),
+		color=~colorNumeric(palette = c("green", "red"), domain = wq_map_data$Filtered_phosphorus_mgL)(wq_map_data$Filtered_phosphorus_mgL), group='Filtered phosphorus (mg/L)') %>%
+		
+	addCircleMarkers(lat=wq_map_data$dec_lat_va, lng=wq_map_data$dec_long_va, radius=calcRadius(wq_map_data$Total_nitrogen_mgL),
+		color=~colorNumeric(palette = c("green", "red"), domain = wq_map_data$Total_nitrogen_mgL)(wq_map_data$Total_nitrogen_mgL), group='Total nitrogen (mg/L)') %>%
+		
+	addCircleMarkers(lat=wq_map_data$dec_lat_va, lng=wq_map_data$dec_long_va, radius=calcRadius(wq_map_data$Filtered_nitrogen_mgL),
+		color=~colorNumeric(palette = c("green", "red"), domain = wq_map_data$Filtered_nitrogen_mgL)(wq_map_data$Filtered_nitrogen_mgL), group='Filtered nitrogen (mg/L)') %>%
+	
+	addCircleMarkers(lat=wq_map_data$dec_lat_va, lng=wq_map_data$dec_long_va, radius=calcRadius(wq_map_data$TN_TP),
+		color=~colorNumeric(palette = c("green", "red"), domain = wq_map_data$TN_TP)(wq_map_data$TN_TP), group='TN:TP (molar)') %>%
+
+	addCircleMarkers(lat=wq_map_data$dec_lat_va, lng=wq_map_data$dec_long_va, radius=calcRadius(wq_map_data$FN_FP),
+		color=~colorNumeric(palette = c("green", "red"), domain = wq_map_data$FN_FP)(wq_map_data$FN_FP), group='FN:FP (molar)') %>%
+		
+	leaflet::addLayersControl(
+		position ="topleft",
+		overlayGroups = c("Salinity (g/L)","Chlorophyll a (ug/L)","Total phosphorus (mg/L)",'Filtered phosphorus (mg/L)', "Total nitrogen (mg/L)", "Filtered nitrogen (mg/L)","TN:TP (molar)","FN:FP (molar)"),
+		options = leaflet::layersControlOptions(collapsed = F)) %>%
+	addLegend("topright", pal = colorNumeric(palette = c("green", "red"), domain = wq_map_data$Salinity_gL), values = ~wq_map_data$Salinity_gL,
+		title = "Salinity (g/L)",
+		group='Salinity (g/L)'
+	) %>%
+	addLegend("topright", pal = colorNumeric(palette = c("green", "red"), domain = wq_map_data$Chlorophyll_a_ugL), values = ~wq_map_data$Chlorophyll_a_ugL,
+		title = "Chlorophyll a (ug/L)",
+		group='Chlorophyll a (ug/L)'
+	) %>%
+	addLegend("topright", pal = colorNumeric(palette = c("green", "red"), domain = wq_map_data$Total_phosphorus_mgL), values = ~wq_map_data$Total_phosphorus_mgL,
+		title = "Total phosphorus (mg/L)",
+		group='Total phosphorus (mg/L)'
+	) %>%
+	addLegend("topright", pal = colorNumeric(palette = c("green", "red"), domain = wq_map_data$Filtered_phosphorus_mgL), values = ~wq_map_data$Filtered_phosphorus_mgL,
+		title = "Filtered phosphorus (mg/L)",
+		group='Filtered phosphorus (mg/L)'
+	) %>%
+	addLegend("topright", pal = colorNumeric(palette = c("green", "red"), domain = wq_map_data$Total_nitrogen_mgL), values = ~wq_map_data$Total_nitrogen_mgL,
+		title = "Total nitrogen (mg/L)",
+		group='Total nitrogen (mg/L)'
+	) %>%
+	addLegend("topright", pal = colorNumeric(palette = c("green", "red"), domain = wq_map_data$Filtered_nitrogen_mgL), values = ~wq_map_data$Filtered_nitrogen_mgL,
+		title = "Filtered nitrogen (mg/L)",
+		group='Filtered nitrogen (mg/L)'
+	) %>%
+	addLegend("topright", pal = colorNumeric(palette = c("green", "red"), domain = wq_map_data$TN_TP), values = ~wq_map_data$TN_TP,
+		title = "TN:TP (molar)",
+		group='TN:TP (molar)'
+	) %>%
+	addLegend("topright", pal = colorNumeric(palette = c("green", "red"), domain = wq_map_data$FN_FP), values = ~wq_map_data$FN_FP,
+		title = "FN:FP (molar)",
+		group='FN:FP (molar)'
+	) %>%
+	hideGroup("Chlorophyll a (ug/L)") %>%
+	hideGroup("Total phosphorus (mg/L)") %>%
+	hideGroup("Filtered phosphorus (mg/L)") %>%
+	hideGroup("Total nitrogen (mg/L)") %>%
+	hideGroup("Filtered nitrogen (mg/L)") %>%
+	hideGroup("TN:TP (molar)") %>%
+	hideGroup("FN:FP (molar)")
+wq_map
+
 ```
+
+
+
+
 
 
 

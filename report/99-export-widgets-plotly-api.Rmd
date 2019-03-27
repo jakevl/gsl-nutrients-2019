@@ -27,18 +27,40 @@ htmlwidgets::saveWidget(mon_inflow, file=paste0(getwd(),"/htmlwidgets/05-mon_inf
 
 
 gsl_sal_ts$width='1000px'
-#api_create(gsl_sal_ts, filename="gsl-salinity-timeseries")
 htmlwidgets::saveWidget(gsl_sal_ts, file=paste0(getwd(),"/htmlwidgets/06-gsl_sal_ts.html"), title="GSL salinity")
+#api_create(gsl_sal_ts, filename="gsl-salinity-timeseries")
 
+sal_boxplot_mon$width='1000px'
+htmlwidgets::saveWidget(sal_boxplot_mon, file=paste0(getwd(),"/htmlwidgets/07-sal_boxplot_mon.html"), title="GSL salinity by bay")
 
 gsl_nuts_ts$width='1000px'
 #api_create(gsl_nuts_ts, filename="gsl-nutrient-timeseries")
-htmlwidgets::saveWidget(gsl_nuts_ts, file=paste0(getwd(),"/htmlwidgets/07-gsl_nuts_ts.html"), title="GSL nutrients")
+htmlwidgets::saveWidget(gsl_nuts_ts, file=paste0(getwd(),"/htmlwidgets/08-gsl_nuts_ts.html"), title="GSL nutrients")
 
+nuts_boxplot_month$width='1000px'
+htmlwidgets::saveWidget(nuts_boxplot_month, file=paste0(getwd(),"/htmlwidgets/09-nuts_boxplot_month.html"), title="GSL nutrients")
 
 gsl_chl_ts$width='1000px'
 #api_create(gsl_chl_ts, filename="gsl-chla-timeseries")
-htmlwidgets::saveWidget(gsl_chl_ts, file=paste0(getwd(),"/htmlwidgets/08-gsl_chl_ts.html"), title="GSL chlorophyll a")
+htmlwidgets::saveWidget(gsl_chl_ts, file=paste0(getwd(),"/htmlwidgets/10-gsl_chl_ts.html"), title="GSL chlorophyll a")
+
+chla_boxplot_month$width='1000px'
+htmlwidgets::saveWidget(chla_boxplot_month, file=paste0(getwd(),"/htmlwidgets/11-chla_boxplot_month.html"), title="GSL chlorophyll a")
+
+sal_boxplot_site$width='1000px'
+htmlwidgets::saveWidget(sal_boxplot_site, file=paste0(getwd(),"/htmlwidgets/12-sal_boxplot_bay.html"), title="GSL salinity by bay")
+
+nuts_boxplot_bay$width='1000px'
+htmlwidgets::saveWidget(nuts_boxplot_bay, file=paste0(getwd(),"/htmlwidgets/13-nuts_boxplot_bay.html"), title="GSL nutrients by bay")
+#api_create(nuts_boxplot_bay, filename="gsl-nutrients-bay")
+
+chla_boxplot_bay$width='1000px'
+htmlwidgets::saveWidget(chla_boxplot_bay, file=paste0(getwd(),"/htmlwidgets/14-chla_boxplot_bay.html"), title="GSL chlorophyll a by bay")
+
+wq_map$width='600px'
+wq_map$height='600px'
+htmlwidgets::saveWidget(wq_map, file=paste0(getwd(),"/htmlwidgets/15-wq_map.html"), title="GSL surface water quality")
+
 
 ```
 

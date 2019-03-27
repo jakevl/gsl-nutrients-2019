@@ -34,7 +34,7 @@ discharge=rbind(discharge,brb_dis)
 ## Lake & tributary water quality data
 
 ```{r, read-wq, cache=T}
-wq_data=dataRetrieval::readNWISqw(startDate="01-01-2010", endDate="12-31-2018",expanded=F,tz="America/Denver",
+wq_data=dataRetrieval::readNWISqw(expanded=F,tz="America/Denver",startDate="01-01-2010", endDate="12-31-2018",
 		siteNumbers=site_list$SiteNumber[site_list$SiteType %in% c("Lake", "Discharge gauge", "Causeway breach")],
 		parameterCd=c(
 			"00098",			
@@ -43,7 +43,8 @@ wq_data=dataRetrieval::readNWISqw(startDate="01-01-2010", endDate="12-31-2018",e
 			"32209",
 			"62854",
 			"62855",
-			"70305")
+			"70305",
+			"00480")
 )
 
 wq_data=dplyr::rename(wq_data,
@@ -53,18 +54,45 @@ wq_data=dplyr::rename(wq_data,
 	Chlorophyll_a_ugL=p32209,
 	Filtered_nitrogen_mgL=p62854,
 	Total_nitrogen_mgL=p62855,
-	Salinity_gL=p70305)
+	Salinity_gL=p70305)#,
+	#Salinity2_gL=p00480)
 
 
+#plot_ly(wq_data, x=~sample_dt) %>%
+#	add_markers(y=~Salinity_gL, name='Salinity (g/L) p70305', marker=list(size=15, opacity=0.8)) %>%
+#	add_markers(y=~Salinity2_gL, name='Salinity (g/L) p00480', marker=list(size=15, opacity=0.8)) %>%
+#	layout(title = "GSL salinity - all sites",
+#		xaxis = list(title = ""),
+#		yaxis = list(side = 'left', title = 'Salinity (g/L)'),
+#		legend = list(x = 0.65, y = 0.9)
+#	) %>% 
+#	config(displaylogo = FALSE,
+#		modeBarButtonsToRemove = c(
+#			'sendDataToCloud',
+#			'hoverClosestCartesian',
+#			'hoverCompareCartesian',
+#			'lasso2d',
+#			'select2d'
+#		)
+#	)
 ```
 
 
 ```{r, rel-depth}
-## Define surface and bottom samples
+## Define surface and bottom samples, add month
 wq_data=within(wq_data,{
 	rel_depth=NA
 	rel_depth[Sampling_depth_m<=1]="Surface"
 	rel_depth[Sampling_depth_m>=4]="Bottom"
+	month=lubridate::month(sample_dt)
+})
+```
+
+## Calculate N:P ratios
+```{r, np-ratios}
+wq_data=within(wq_data,{
+	FN_FP=Filtered_nitrogen_mgL/Filtered_phosphorus_mgL * (30.974/14.007)
+	TN_TP=Total_nitrogen_mgL/Total_phosphorus_mgL * (30.974/14.007)
 })
 ```
 
@@ -82,7 +110,7 @@ sites=merge(sites,site_list, by.x=c("site_no","station_nm"), by.y=c("SiteNumber"
 
 ## Add site metadata to WQ data
 ```{r, site-metadata-wq}
-wq_data=merge(wq_data,site_list, by.x="site_no", by.y="SiteNumber", all.x=T)
+wq_data=merge(wq_data,sites, all.x=T)
 ```
 
 
