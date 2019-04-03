@@ -1,0 +1,23 @@
+# GSL water quality spatial variations {#wq-spatial}
+
+## Salinity
+```{r, echo=F, fig.cap = "Salinity spatial variability, GSL salinity by bay.", fig.width=8}
+sal_boxplot_bay
+```
+
+## Nutrients
+```{r, echo=F, fig.cap = "Nutrient concentration spatial variability, GSL nutrient concentrations and ratios by bay.", fig.width=8}
+nuts_boxplot_bay
+```
+
+## Chlorophyll a
+```{r, echo=F, fig.cap = "Chlorophyll a spatial variability, GSL chlorophyll a by bay.", fig.width=8}
+chla_boxplot_bay
+```
+
+## Water quality map
+```{r, echo=F, fig.cap = "GSL water quality map: average concentrations and ratios of water quality characteristics at GSL monitoring locations.", fig.width=8, fig.height=6}
+wq_map
+```
+
+

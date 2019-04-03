@@ -1,0 +1,6 @@
+# Site map {#site-map}
+
+```{r, echo=F, fig.cap = "Site location map.", fig.width=8, fig.height=6}
+options(warn = -1)
+site_map
+```

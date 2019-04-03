@@ -1,5 +1,5 @@
 # Export html widgets and plotly API files
-```{r, export-widgets}
+```{r, export-widgets, eval=F}
 
 site_map$width='600px'
 site_map$height='600px'
@@ -30,8 +30,8 @@ gsl_sal_ts$width='1000px'
 htmlwidgets::saveWidget(gsl_sal_ts, file=paste0(getwd(),"/htmlwidgets/06-gsl_sal_ts.html"), title="GSL salinity")
 #api_create(gsl_sal_ts, filename="gsl-salinity-timeseries")
 
-sal_boxplot_mon$width='1000px'
-htmlwidgets::saveWidget(sal_boxplot_mon, file=paste0(getwd(),"/htmlwidgets/07-sal_boxplot_mon.html"), title="GSL salinity by bay")
+sal_boxplot_month$width='1000px'
+htmlwidgets::saveWidget(sal_boxplot_month, file=paste0(getwd(),"/htmlwidgets/07-sal_boxplot_month.html"), title="GSL salinity by bay")
 
 gsl_nuts_ts$width='1000px'
 #api_create(gsl_nuts_ts, filename="gsl-nutrient-timeseries")

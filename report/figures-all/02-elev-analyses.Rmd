@@ -1,0 +1,7 @@
+# GSL Elevation {#elev-analyses}
+
+```{r, echo=F, fig.cap = "GSL water surface elevations.", fig.width=8}
+elev_plot
+```
+
+

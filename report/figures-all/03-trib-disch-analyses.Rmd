@@ -1,0 +1,18 @@
+# Tributary discharge {#trib-disch-analyses}
+
+## Daily discharge
+```{r, echo=F, fig.cap = "Daily discharges at gauged GSL tributaries.", fig.width=8}
+disch_boxplot
+```
+<br>
+<br>
+<br>
+
+```{r, echo=F, fig.cap = "Daily discharges at gauged GSL tributaries over time.", fig.width=8}
+disch_ts
+```
+
+## Monthly inflows
+```{r, echo=F, fig.cap = "Monthly inflow volumes at gauged GSL tributaries over time.", fig.width=8}
+mon_inflow
+```

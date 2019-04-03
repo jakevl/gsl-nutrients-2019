@@ -1,0 +1,37 @@
+# GSL water quality timeseries {#wq-timeseries}
+
+## Salinity
+```{r, echo=F, fig.cap = "GSL salinity time series.", fig.width=8}
+gsl_sal_ts
+```
+<br>
+<br>
+<br>
+
+```{r, echo=F, fig.cap = "GSL monthly variation in salinity.", fig.width=8}
+sal_boxplot_month
+```
+
+## Nutrients
+```{r, echo=F, fig.cap = "GSL nutrient concentration and ratio time series.", fig.width=8}
+gsl_nuts_ts
+```
+<br>
+<br>
+<br>
+
+```{r, echo=F, fig.cap = "GSL monthly variation in nutrient concentrations and ratios.", fig.width=8}
+nuts_boxplot_month
+```
+
+## Chlorophyll a
+```{r, echo=F, fig.cap = "GSL chlorophyll a time series.", fig.width=8}
+gsl_chl_ts
+```
+<br>
+<br>
+<br>
+
+```{r, echo=F, fig.cap = "GSL monthly variation in chlorophyll a.", fig.width=8}
+chla_boxplot_month
+```
