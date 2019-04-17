@@ -14,7 +14,8 @@ cols=list(
 ```{r, wq-flatten}
 
 wq_data_flat=reshape2::melt(wq_data, id.vars=c("site_no", "station_nm", "Bay", "sample_dt", "sample_tm", "rel_depth", "Sampling_depth_m","dec_lat_va","dec_long_va", "month"),
-							measure.vars=c("Salinity_gL", "Chlorophyll_a_ugL", "Total_phosphorus_mgL","Filtered_phosphorus_mgL","Filtered_nitrogen_mgL","Total_nitrogen_mgL", "TN_TP","FN_FP"))
+							measure.vars=c("Salinity_gL", "Chlorophyll_a_ugL", "Total_phosphorus_mgL","Filtered_phosphorus_mgL","Filtered_nitrogen_mgL","Total_nitrogen_mgL", "TN_TP","FN_FP"),
+							na.rm=T)
 
 wq_data_flat=wq_data_flat[!is.na(wq_data_flat$Bay) & !is.na(wq_data_flat$rel_depth),]
 wq_data_flat=within(wq_data_flat,{
@@ -263,6 +264,58 @@ chla_boxplot_month=
 chla_boxplot_month
 
 ```
+
+
+### Bottom:Surface ratio timeseries
+```{r, bs-ts}
+
+surf_data_flat=wq_data_flat[wq_data_flat$rel_depth=='Surface', !names(wq_data_flat) %in% c('sample_tm', 'rel_depth', 'Sampling_depth_m', 'bay_depth')]
+surf_data_flat=dplyr::rename(surf_data_flat, surf_value=value) #note data include some field replicate QAQC samples, these are aggregated to daily means for this plot
+bottom_data_flat=wq_data_flat[wq_data_flat$rel_depth=='Bottom', !names(wq_data_flat) %in% c('sample_tm', 'rel_depth', 'Sampling_depth_m', 'bay_depth')]
+bottom_data_flat=dplyr::rename(bottom_data_flat, bott_value=value)
+dim(surf_data_flat)
+dim(bottom_data_flat)
+merged_surf_bott=merge(surf_data_flat, bottom_data_flat, all.x=T)
+dim(merged_surf_bott)
+
+merged_surf_bott$bs_ratio=merged_surf_bott$bott_value/merged_surf_bott$surf_value
+
+
+bs_ts=
+	plot_ly(data=merged_surf_bott, x=~sample_dt) %>%
+		add_lines(y=1, showlegend=F, line = list(width = 3)) %>%
+		add_markers(data=merged_surf_bott[merged_surf_bott$param=='Salinity',] , y=~bs_ratio, name='Salinity', visible=T, 
+			marker = list(color = cols[[1]][[1]],size = 10,line = list(color = cols[[1]][[2]],width = 2))) %>%
+		add_markers(data=merged_surf_bott[merged_surf_bott$param=='Total phosphorus',] , y=~bs_ratio, name='Total phosphorus', visible=T, 
+			marker = list(color = cols[[2]][[1]],size = 10,line = list(color = cols[[2]][[2]],width = 2))) %>%
+		add_markers(data=merged_surf_bott[merged_surf_bott$param=='Filtered phosphorus',] , y=~bs_ratio, name='Filtered phosphorus', visible='legendonly', 
+			marker = list(color = cols[[3]][[1]],size = 10,line = list(color = cols[[3]][[2]],width = 2))) %>%
+		add_markers(data=merged_surf_bott[merged_surf_bott$param=='Total nitrogen',] , y=~bs_ratio, name='Total nitrogen', visible='legendonly', 
+			marker = list(color = cols[[5]][[1]],size = 10, line = list(color = cols[[5]][[2]],width = 2))) %>%
+		add_markers(data=merged_surf_bott[merged_surf_bott$param=='Filtered nitrogen',] , y=~bs_ratio, name='Filtered nitrogen', visible='legendonly', 
+			marker = list(color = cols[[4]][[1]],size = 10,line = list(color = cols[[4]][[2]],width = 2))) %>%
+		layout(
+			title = "GSL salinity and nutrient bottom:surface concentration ratios",
+			xaxis = list(title = ""),
+			yaxis = list(side = 'left', title = 'Bottom:surface concentration ratio')
+		) %>% 
+		config(displaylogo = FALSE, collaborate = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+
+bs_ts
+#api_create(bs_ts, filename='GSL_bot_surf_ratio_ts')
+```
+
+
+
+
 
 
 
