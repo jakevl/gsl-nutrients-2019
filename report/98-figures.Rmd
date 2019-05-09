@@ -4,8 +4,8 @@
 fig_caption: yes
 ---
 
-```{r, echo=F, eval=F}
-	save(site_map,elev_plot,disch_boxplot,disch_ts,mon_inflow,gsl_sal_ts,sal_boxplot_month,gsl_nuts_ts,nuts_boxplot_month,gsl_chl_ts,chla_boxplot_month,sal_boxplot_bay,nuts_boxplot_bay,chla_boxplot_bay,wq_map,
+```{r, echo=F, eval=T}
+	save(site_map,elev_plot,disch_boxplot,disch_ts,mon_inflow,gsl_sal_ts,sal_boxplot_month,gsl_nuts_ts,nuts_boxplot_month,gsl_chl_ts,chla_boxplot_month,sal_boxplot_bay,nuts_boxplot_bay,chla_boxplot_bay,wq_map,bs_ts,
 		file='figures-all/figures.RData')
 ```
 
@@ -116,4 +116,10 @@ wq_map
 <br>
 <br>
 
+```{r, echo=F, fig.cap = "Figure 16. Ratios of bottom(>= 4m) : surface (<= 1m) sample concentrations of salinity and nutrient constituents.", fig.width=8, fig.height=6}
+bs_ts
+```
+<br>
+<br>
+<br>
 

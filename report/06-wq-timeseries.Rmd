@@ -266,7 +266,7 @@ chla_boxplot_month
 ```
 
 
-### Bottom:Surface ratio timeseries
+## Bottom:Surface ratio timeseries
 ```{r, bs-ts}
 
 surf_data_flat=wq_data_flat[wq_data_flat$rel_depth=='Surface', !names(wq_data_flat) %in% c('sample_tm', 'rel_depth', 'Sampling_depth_m', 'bay_depth')]
@@ -302,8 +302,6 @@ bs_ts=
 		config(displaylogo = FALSE, collaborate = FALSE,
 			modeBarButtonsToRemove = c(
 				'sendDataToCloud',
-				'hoverClosestCartesian',
-				'hoverCompareCartesian',
 				'lasso2d',
 				'select2d'
 			)

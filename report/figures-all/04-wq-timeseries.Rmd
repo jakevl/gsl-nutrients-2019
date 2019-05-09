@@ -35,3 +35,15 @@ gsl_chl_ts
 ```{r, echo=F, fig.cap = "GSL monthly variation in chlorophyll a.", fig.width=8}
 chla_boxplot_month
 ```
+<br>
+<br>
+<br>
+
+## Bottom:Surface ratio timeseries
+```{r, echo=F, fig.cap = "Ratios of bottom(>= 4m) : surface (<= 1m) sample concentrations of salinity and nutrient constituents.", fig.width=8}
+bs_ts
+```
+<br>
+<br>
+<br>
+

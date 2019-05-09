@@ -9,7 +9,8 @@ fig_caption: yes
 ---
 
 # Figures only version {-}
-This is a figures only version of a set of GSL water quality and nutrient analyses. For details and code see: https://bookdown.org/jakevl/gsl-nutrients-2019/
+This is a figures only version of a set of GSL water quality and nutrient analyses. All data are drawn from USGS NWIS. Figures are based on data from calendar years 2010 - 2018.  
+For details and code see: [bookdown.org/jakevl/gsl-nutrients-2019](https://bookdown.org/jakevl/gsl-nutrients-2019/){target="_blank"}
 
 ```{r, echo=F}
 #setwd("C:/Users/jvander/Documents/R/gsl_nutrient_report_2019/report/figures-all")
