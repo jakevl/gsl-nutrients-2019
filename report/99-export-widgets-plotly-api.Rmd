@@ -61,6 +61,18 @@ wq_map$width='600px'
 wq_map$height='600px'
 htmlwidgets::saveWidget(wq_map, file=paste0(getwd(),"/htmlwidgets/15-wq_map.html"), title="GSL surface water quality")
 
+bs_ts$width='1000px'
+htmlwidgets::saveWidget(bs_ts, file=paste0(getwd(),"/htmlwidgets/16-bs_ts.html"), title="Bottom:surface ratios")
+
+sal_elev_plot$width='1000px'
+htmlwidgets::saveWidget(sal_elev_plot, file=paste0(getwd(),"/htmlwidgets/17-sal_elev_plot.html"), title="Surface salinity ~ lake elevation")
+
+p_elev_plot$width='1000px'
+htmlwidgets::saveWidget(p_elev_plot, file=paste0(getwd(),"/htmlwidgets/18-p_elev_plot.html"), title="Surface phosphorus ~ lake elevation")
+
+n_elev_plot$width='1000px'
+htmlwidgets::saveWidget(n_elev_plot, file=paste0(getwd(),"/htmlwidgets/19-n_elev_plot.html"), title="Surface nitrogen ~ lake elevation")
+
 
 ```
 

@@ -5,7 +5,8 @@ fig_caption: yes
 ---
 
 ```{r, echo=F, eval=T}
-	save(site_map,elev_plot,disch_boxplot,disch_ts,mon_inflow,gsl_sal_ts,sal_boxplot_month,gsl_nuts_ts,nuts_boxplot_month,gsl_chl_ts,chla_boxplot_month,sal_boxplot_bay,nuts_boxplot_bay,chla_boxplot_bay,wq_map,bs_ts,
+	save(site_map,elev_plot,disch_boxplot,disch_ts,mon_inflow,gsl_sal_ts,sal_boxplot_month,gsl_nuts_ts,nuts_boxplot_month,gsl_chl_ts,
+		 chla_boxplot_month,sal_boxplot_bay,nuts_boxplot_bay,chla_boxplot_bay,wq_map,bs_ts,sal_elev_plot,p_elev_plot,n_elev_plot,
 		file='figures-all/figures.RData')
 ```
 
@@ -123,3 +124,23 @@ bs_ts
 <br>
 <br>
 
+```{r, echo=F, fig.cap = "Figure 17. Surface salinity regression on Gilbert Bay surface elevation.", fig.width=8, fig.height=6}
+sal_elev_plot
+```
+<br>
+<br>
+<br>
+
+```{r, echo=F, fig.cap = "Figure 18. Surface phosphorus regressions on Gilbert Bay surface elevation.", fig.width=8, fig.height=6}
+p_elev_plot
+```
+<br>
+<br>
+<br>
+
+```{r, echo=F, fig.cap = "Figure 19. Surface nitrogen regressions on Gilbert Bay surface elevation.", fig.width=8, fig.height=6}
+n_elev_plot
+```
+<br>
+<br>
+<br>

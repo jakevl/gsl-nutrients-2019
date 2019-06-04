@@ -1,0 +1,105 @@
+# GSL water quality ~ lake elevation relationships {#wq-elev}
+
+## Join daily Gilbert Bay elevation to WQ data
+```{r, wq-elev-join}
+gb_elev=subset(elevation, site_no == 10010000)
+gb_elev=gb_elev[,c('Date','elev_ft')]
+
+wq_data_flat_elev=merge(wq_data_flat, gb_elev, all.x=T, by.x='sample_dt', by.y='Date')
+wq_data_flat_elev=wq_data_flat_elev[wq_data_flat_elev$rel_depth=='Surface',]
+
+```
+
+## Salinity on elevation
+```{r, sal_elev_plot}
+sal_elev_plot=
+	plot_ly(data=wq_data_flat_elev[wq_data_flat_elev$variable=='Salinity_gL',]) %>% 
+		add_markers(x=~elev_ft, y=~value, name='Salinity',
+			marker = list(color = cols[[1]][[1]],size = 10,line = list(color = cols[[1]][[2]],width = 2))
+		) %>% 
+		add_lines(x=~elev_ft, y=fitted(lm(value~elev_ft, wq_data_flat_elev[wq_data_flat_elev$variable=='Salinity_gL',])), name='Salinity regression',
+			line = list(color = cols[[1]][[2]],width = 2)
+		) %>%	
+		layout(title = "Surface salinity ~ lake elevation",
+			boxmode = "group",
+			xaxis = list(title = "Gilbert Bay elevation (feet)"),
+			yaxis = list(side = 'left', title = 'Salinity (g/L)')
+		) %>% 
+		config(displaylogo = FALSE, collaborate = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+sal_elev_plot
+```
+
+## Phosphorus on elevation
+```{r, p_elev_plot}
+p_elev_plot=
+	plot_ly() %>% 
+		add_markers(data=wq_data_flat_elev[wq_data_flat_elev$variable=='Total_phosphorus_mgL',], x=~elev_ft, y=~value, name='Total phosphorus',
+			marker = list(color = cols[[2]][[1]],size = 10,line = list(color = cols[[2]][[2]],width = 2))
+		) %>% 
+		add_lines(data=wq_data_flat_elev[wq_data_flat_elev$variable=='Total_phosphorus_mgL',], x=~elev_ft, y=fitted(lm(value~elev_ft, wq_data_flat_elev[wq_data_flat_elev$variable=='Total_phosphorus_mgL',])), name='Total phosphorus regression',
+			line = list(color = cols[[2]][[2]],width = 2)
+		) %>%	
+		add_markers(data=wq_data_flat_elev[wq_data_flat_elev$variable=='Filtered_phosphorus_mgL',], x=~elev_ft, y=~value, name='Filtered phosphorus',
+			marker = list(color = cols[[3]][[1]],size = 10,line = list(color = cols[[3]][[2]],width = 2))
+		) %>% 
+		add_lines(data=wq_data_flat_elev[wq_data_flat_elev$variable=='Filtered_phosphorus_mgL',], x=~elev_ft, y=fitted(lm(value~elev_ft, wq_data_flat_elev[wq_data_flat_elev$variable=='Filtered_phosphorus_mgL',])), name='Filtered phosphorus regression',
+			line = list(color = cols[[3]][[2]],width = 2)
+		) %>%	
+		layout(title = "Surface phosphorus ~ lake elevation",
+			boxmode = "group",
+			xaxis = list(title = "Gilbert Bay elevation (feet)"),
+			yaxis = list(side = 'left', title = 'Phosphorus (mg/L)')
+		) %>% 
+		config(displaylogo = FALSE, collaborate = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+p_elev_plot
+```
+
+## Nitrogen on elevation
+```{r, n_elev_plot}
+n_elev_plot=
+	plot_ly() %>% 
+		add_markers(data=wq_data_flat_elev[wq_data_flat_elev$variable=='Total_nitrogen_mgL',], x=~elev_ft, y=~value, name='Total nitrogen',
+			marker = list(color = cols[[4]][[1]],size = 10,line = list(color = cols[[4]][[2]],width = 2))
+		) %>% 
+		add_lines(data=wq_data_flat_elev[wq_data_flat_elev$variable=='Total_nitrogen_mgL',], x=~elev_ft, y=fitted(lm(value~elev_ft, wq_data_flat_elev[wq_data_flat_elev$variable=='Total_nitrogen_mgL',])), name='Total nitrogen regression',
+			line = list(color = cols[[4]][[2]],width = 2)
+		) %>%	
+		add_markers(data=wq_data_flat_elev[wq_data_flat_elev$variable=='Filtered_nitrogen_mgL',], x=~elev_ft, y=~value, name='Filtered nitrogen',
+			marker = list(color = cols[[5]][[1]],size = 10,line = list(color = cols[[5]][[2]],width = 2))
+		) %>% 
+		add_lines(data=wq_data_flat_elev[wq_data_flat_elev$variable=='Filtered_nitrogen_mgL',], x=~elev_ft, y=fitted(lm(value~elev_ft, wq_data_flat_elev[wq_data_flat_elev$variable=='Filtered_nitrogen_mgL',])), name='Filtered nitrogen regression',
+			line = list(color = cols[[5]][[2]],width = 2)
+		) %>%	
+		layout(title = "Surface nitrogen ~ lake elevation",
+			boxmode = "group",
+			xaxis = list(title = "Gilbert Bay elevation (feet)"),
+			yaxis = list(side = 'left', title = 'Nitrogen (mg/L)')
+		) %>% 
+		config(displaylogo = FALSE, collaborate = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+n_elev_plot
+```
+

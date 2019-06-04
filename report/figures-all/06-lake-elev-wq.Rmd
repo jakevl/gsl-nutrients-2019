@@ -1,0 +1,17 @@
+# GSL water quality spatial variations {#wq-elev}
+
+## Salinity on elevation
+```{r, echo=F, fig.cap = "Regression of surface salinity concentrations on Gilbert Bay surface elevation.", fig.width=8}
+sal_elev_plot
+```
+
+## Phosphorus on elevation
+```{r, echo=F, fig.cap = "Regressions of surface phosphorus concentrations on Gilbert Bay surface elevation.", fig.width=8}
+p_elev_plot
+```
+
+## Nitrogen on elevation
+```{r, echo=F, fig.cap = "Regressions of surface nitrogen concentrations on Gilbert Bay surface elevation.", fig.width=8}
+n_elev_plot
+```
+
