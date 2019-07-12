@@ -1,0 +1,256 @@
+# Gilbert Bay nutrient pool calculations {#gb-nut-pools}
+Following the approach from Naftz et al. 2017 to calculate DBL & UBL volumes and constituent masses.
+
+## Calculate UBL & DBL volumes
+```{r, volume-calcs}
+gb_elev_vol=subset(elevation, site_no==10010000)
+gb_elev_vol=within(gb_elev_vol, {
+	elev_m=elev_ft/3.28084
+	DBL_elev_N=-46.51008+1.03163*elev_m
+	DBL_elev_N[DBL_elev_N<1269.43714800001]=1269.43714800001 #Setting minimum possible N DBL elevation at inflection point of formula
+	DBL_elev_S=-104.967+1.07643*elev_m
+	DBL_elev_S[DBL_elev_S<1270.92582600001]=1270.92582600001 #Setting minimum possible S DBL elevation at inflection point of formula
+	DBL_vol_N_m3=59633174862208.5-93949911022.036*DBL_elev_N+37003662.2562751*DBL_elev_N^2
+	DBL_vol_S_m3=120180569424473-189400877631.774*DBL_elev_S+74622375.23038100*DBL_elev_S^2
+	DBL_vol_total_m3=DBL_vol_S_m3+DBL_vol_N_m3
+	UBL_vol_m3=(137054926141519-216113402592.612*elev_m+85193657.0902014*elev_m^2)-DBL_vol_total_m3
+	GB_vol_m3=137054926141519-216113402592.612*elev_m+85193657.0902014*elev_m^2
+	DBL_vol_acreft=DBL_vol_total_m3*0.000810714
+	UBL_vol_acreft=UBL_vol_m3*0.000810714
+	GB_vol_acreft=GB_vol_m3*0.000810714
+	year=lubridate::year(Date)
+	month=lubridate::month(Date)
+})
+
+DBL_vol_YrMo=aggregate(DBL_vol_total_m3~year+month,FUN='mean',gb_elev_vol)
+UBL_vol_YrMo=aggregate(UBL_vol_m3~year+month,FUN='mean',gb_elev_vol)
+gb_vol_YrMo=merge(UBL_vol_YrMo,DBL_vol_YrMo,by=c("year","month"))
+```
+
+## ID WQ samples as UBL or DBL representatives
+Defined DBL samples as those occurring at sites 405356112205601 or 410644112382601 and with sampling depth >= 5 meters (see map).  
+Defined UBL samples as any sample in Gilbert Bay >= 2 meters sampling depth. 
+
+```{r, ubl-dbl}
+wq_data_flat=within(wq_data_flat, {
+	bl=NA
+	bl[(site_no==405356112205601 | site_no== 410644112382601) & Sampling_depth_m >=5] = 'DBL'
+	bl[Bay=='Gilbert' & Sampling_depth_m <=2] = 'UBL'
+})
+```
+
+## Put all constituents in same units (mg/L) to simplify calculations
+```{r, pool-units}
+gb_pool_wq_data=subset(wq_data_flat, !is.na(bl) & variable %in% c('Salinity_gL','Chlorophyll_a_ugL','Total_phosphorus_mgL','Filtered_phosphorus_mgL','Filtered_nitrogen_mgL','Total_nitrogen_mgL'))
+gb_pool_wq_data=droplevels(within(gb_pool_wq_data, {
+	variable=as.character(variable)
+	value[variable=='Salinity_gL'] = value * 1000
+	value[variable=='Chlorophyll_a_ugL'] = value/1000
+	variable[variable=='Salinity_gL'] = 'Salinity_mgL'
+	variable[variable=='Chlorophyll_a_ugL'] = 'Chlorophyll_a_mgL'
+	year=lubridate::year(sample_dt)
+	month=lubridate::month(sample_dt)
+}))
+knitr::kable(table(gb_pool_wq_data$variable))
+```
+
+## Calculate monthly means & SDs for UBL & DBL WQ parameters
+```{r, calc-mon}
+mon_means=aggregate(value~year+month+variable+param+bl, gb_pool_wq_data, FUN='mean')
+mon_sd=aggregate(value~year+month+variable+param+bl, gb_pool_wq_data, FUN='sd')
+mon_means=reshape2::dcast(mon_means, year+month+variable+param~bl, value.var='value')
+mon_sd=reshape2::dcast(mon_sd, year+month+variable+param~bl, value.var='value')
+mon_means=dplyr::rename(mon_means, DBL_mean=DBL, UBL_mean=UBL)
+mon_sd=dplyr::rename(mon_sd, DBL_sd=DBL, UBL_sd=UBL)
+mon_means=merge(mon_means, mon_sd)
+```
+
+## Merge monthly WQ means & monthly volume estimates
+```{r}
+gb_pool_data=merge(gb_vol_YrMo, mon_means)
+```
+
+## Calculate masses
+```{r, calc-mass}
+gb_pool_data=within(gb_pool_data, {
+	UBL_mass_kg=UBL_vol_m3*UBL_mean*0.001
+	DBL_mass_kg=DBL_vol_total_m3*DBL_mean*0.001
+	tot_mass_kg=DBL_mass_kg+UBL_mass_kg
+	YrMo=as.Date(paste0(year,"-",month,"-01"),format='%Y-%m-%d')
+})
+gb_pool_data=gb_pool_data[order(gb_pool_data$YrMo),]
+```
+
+## Compare filtered (dissolved) nitrogen results to Natfz 2017
+```{r, jvl-dn-comp1}
+jv_dn_mass=subset(gb_pool_data, variable=='Filtered_nitrogen_mgL')
+naftz_dn_mass=read.csv(file='naftz2017_DN_mass.csv')
+comp=merge(jv_dn_mass, naftz_dn_mass)
+plot(tot_mass_kg~DN_total_kg, comp, main='Gilbert Bay dissolved nitrogen pool (kg)', xlab='Natz 2017 estimate', ylab='JVL estimate', cex=1.5)
+abline(0,1, lty=2)
+plot(DBL_mass_kg~DN_DBL_kg, comp, main='DBL dissolved nitrogen pool (kg)', xlab='Natz 2017 estimate', ylab='JVL estimate', cex=1.5)
+abline(0,1, lty=2)
+plot(UBL_mass_kg~DN_UBL_kg, comp, main='UBL dissolved nitrogen pool (kg)', xlab='Natz 2017 estimate', ylab='JVL estimate', cex=1.5)
+abline(0,1, lty=2)
+comp=comp[order(comp$YrMo),]
+jvl_dn_comp=plot_ly(data=comp) %>%
+	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, name='JVL', mode='lines+markers') %>%
+	add_trace(type='scatter', y=~DN_total_kg, x=~YrMo, name='Naftz', mode='lines+markers') %>%
+	layout(title = "Gilbert Bay filtered nitrogen pool (UBL + DBL)",
+		xaxis = list(title = ""),
+		yaxis = list(side = 'left', title = 'Filtered nitrogen mass (kg)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+jvl_dn_comp
+
+```
+
+## Mass plots for all constituents
+### Total nitrogen
+```{r, tn-mass-plot}
+tn_mass_plot=plot_ly(data=gb_pool_data[gb_pool_data$param=='Total nitrogen',]) %>%
+	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, mode = 'lines+markers', name='Total') %>%
+	add_trace(type='scatter', y=~DBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Deep brine layer') %>%
+	add_trace(type='scatter', y=~UBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Upper brine layer') %>%
+	layout(title = "Gilbert Bay total nitrogen pool",
+		xaxis = list(title = "", range=c(min(gb_pool_data$YrMo), max(gb_pool_data$YrMo))),
+		yaxis = list(side = 'left', title = 'Total nitrogen mass (kg)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+tn_mass_plot
+```
+
+### Filtered (dissolved) nitrogen
+```{r, fn-mass-plot}
+fn_mass_plot=plot_ly(data=gb_pool_data[gb_pool_data$param=='Filtered nitrogen',]) %>%
+	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, mode = 'lines+markers', name='Total') %>%
+	add_trace(type='scatter', y=~DBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Deep brine layer') %>%
+	add_trace(type='scatter', y=~UBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Upper brine layer') %>%
+	layout(title = "Gilbert Bay filtered nitrogen pool",
+		xaxis = list(title = "", range=c(min(gb_pool_data$YrMo), max(gb_pool_data$YrMo))),
+		yaxis = list(side = 'left', title = 'Filtered nitrogen mass (kg)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+fn_mass_plot
+```
+
+### Total phosphorus
+```{r, tp-mass-plot}
+tp_mass_plot=plot_ly(data=gb_pool_data[gb_pool_data$param=='Total phosphorus',]) %>%
+	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, mode = 'lines+markers', name='Total') %>%
+	add_trace(type='scatter', y=~DBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Deep brine layer') %>%
+	add_trace(type='scatter', y=~UBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Upper brine layer') %>%
+	layout(title = "Gilbert Bay total phosphorus pool",
+		xaxis = list(title = "", range=c(min(gb_pool_data$YrMo), max(gb_pool_data$YrMo))),
+		yaxis = list(side = 'left', title = 'Total phosphorus mass (kg)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+tp_mass_plot
+```
+
+### Filtered (dissolved) phosphorus
+```{r, fp-mass-plot}
+fp_mass_plot=plot_ly(data=gb_pool_data[gb_pool_data$param=='Filtered phosphorus',]) %>%
+	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, mode = 'lines+markers', name='Total') %>%
+	add_trace(type='scatter', y=~DBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Deep brine layer') %>%
+	add_trace(type='scatter', y=~UBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Upper brine layer') %>%
+	layout(title = "Gilbert Bay filtered phosphorus pool",
+		xaxis = list(title = "", range=c(min(gb_pool_data$YrMo), max(gb_pool_data$YrMo))),
+		yaxis = list(side = 'left', title = 'Filtered phosphorus mass (kg)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+fp_mass_plot
+```
+
+### Salt
+```{r, salt-mass-plot}
+salt_mass_plot=plot_ly(data=gb_pool_data[gb_pool_data$param=='Salinity',]) %>%
+	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, mode = 'lines+markers', name='Total') %>%
+	add_trace(type='scatter', y=~DBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Deep brine layer') %>%
+	add_trace(type='scatter', y=~UBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Upper brine layer') %>%
+	layout(title = "Gilbert Bay salt pool",
+		xaxis = list(title = "", range=c(min(gb_pool_data$YrMo), max(gb_pool_data$YrMo))),
+		yaxis = list(side = 'left', title = 'Salt mass (kg)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+salt_mass_plot
+```
+
+### Chlorophyll a
+```{r, chla-mass-plot}
+chla_mass_plot=plot_ly(data=gb_pool_data[gb_pool_data$param=='Chlorophyll a',]) %>%
+	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, mode = 'lines+markers', name='Total') %>%
+	add_trace(type='scatter', y=~DBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Deep brine layer') %>%
+	add_trace(type='scatter', y=~UBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Upper brine layer') %>%
+	layout(title = "Gilbert Bay chlorophyll a pool",
+		xaxis = list(title = "", range=c(min(gb_pool_data$YrMo), max(gb_pool_data$YrMo))),
+		yaxis = list(side = 'left', title = 'Chlorophyll a mass (kg)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+chla_mass_plot
+```
+
+## Ideas for carrying sampling variability/error through analyses
+*Estimate mass by each individual sample, rather than aggregating to monthly means. Use variability 
+in these estimates to characterize variability overall
+
+
+
+
+

@@ -1,0 +1,20 @@
+# GSL water quality long term patterns {#wq-lt}
+## Total phosphorus
+```{r, echo=F, fig.cap = "Long term total phosphorus pattern.", fig.width=8}
+tp_lt_ts
+```
+	
+## Total nitrogen
+```{r, echo=F, fig.cap = "Long term total nitrogen pattern.", fig.width=8}
+tn_lt_ts
+```
+
+## Chlorophyll a
+```{r, echo=F, fig.cap = "Long term chlorophyll a pattern.", fig.width=8}
+chla_lt_ts
+```
+
+## Salinity
+```{r, echo=F, fig.cap = "Long term salinity pattern.", fig.width=8}
+salt_lt_ts
+```

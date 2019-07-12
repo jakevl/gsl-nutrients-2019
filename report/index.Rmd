@@ -8,6 +8,7 @@ documentclass: book
 ---
 
 # Introduction {-}
-This book contains a set of GSL water quality and nutrient analyses, figures, and code for generating them. All data are drawn from USGS NWIS. Figures are based on data from calendar years 2010 - 2018.  
+This book contains a set of GSL water quality and nutrient analyses, figures, and code for generating them. All data are drawn from USGS NWIS or EPA WQP.  
 The source code for generating this book is available via [GitHub repository](https://github.com/jakevl/gsl-nutrients-2019){target="_blank"}.  
+
 

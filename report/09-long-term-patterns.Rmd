@@ -1,0 +1,121 @@
+# GSL water quality long term patterns {#wq-lt}
+
+```{r, lt-data}
+lt_data=readWQP(type='result', auid=c('UT-L-16020310-001_00','UT-L-16020310-004_00','UT-L-16020310-003_00'),
+	characteristicName=c('Phosphate-phosphorus','Nitrogen','Salinity', 'Chlorophyll a', 'Chlorophyll a, uncorrected for pheophytin', 'Chlorophyll a, corrected for pheophytin'),
+	start_date="01/01/1990"
+	)
+
+lt_data2=readWQP(type='result', auid=c('UT-L-16020310-001_00','UT-L-16020310-004_00','UT-L-16020310-003_00'),
+	pCode=c("00098","00665","00666","32209","62854","62855","70305","00480"),
+	start_date="01/01/1990"
+	)
+
+lt_data=unique(rbind(lt_data, lt_data2))
+
+lt_sites=readWQP(type='sites', siteid=unique(lt_data$MonitoringLocationIdentifier))
+lt_sites=assignAUs(lt_sites)
+
+knitr::kable(table(lt_data$CharacteristicName, lt_data$ResultMeasure.MeasureUnitCode))
+knitr::kable(table(lt_data$CharacteristicName, lt_data$ResultSampleFractionText))
+knitr::kable(table(lt_data$CharacteristicName, lt_data$OrganizationIdentifier))
+
+lt_data=within(lt_data, {
+	param=NA
+	param[CharacteristicName=='Chlorophyll a'] = 'Chlorophyll a'
+	param[CharacteristicName=='Chlorophyll a, uncorrected for pheophytin'] = 'Chlorophyll a'
+	param[CharacteristicName=='Nitrogen'] = 'Nitrogen'
+	param[CharacteristicName=='Nitrogen, mixed forms (NH3), (NH4), organic, (NO2) and (NO3)'] = 'Nitrogen'
+	param[CharacteristicName=='Phosphate-phosphorus'] = 'Phosphorus'
+	param[CharacteristicName=='Phosphorus'] = 'Phosphorus'
+	param[CharacteristicName=='Salinity'] = 'Salinity'
+	year=lubridate::year(ActivityStartDate)
+})
+
+lt_data=droplevels(merge(lt_data, lt_sites))
+```
+
+## Long-term plots
+### Total phosphorus
+```{r}
+tp_lt_ts=plot_ly(data=lt_data[lt_data$param=='Phosphorus' & lt_data$ResultSampleFractionText=='Total',], type='box') %>%
+	add_trace(type='box', x=~year, y=~ResultMeasureValue, color=~AU_NAME) %>%
+	layout(title = "Total phosphorus",
+		boxmode = "group",
+		xaxis = list(title = "Year"),
+		yaxis = list(side = 'left', title = 'Total phosphorus (mg/L)', type = "log")
+	) %>% 
+	config(displaylogo = FALSE,
+		modeBarButtonsToRemove = c(
+			'sendDataToCloud',
+			'hoverClosestCartesian',
+			'hoverCompareCartesian',
+			'lasso2d',
+			'select2d'
+		)
+	)
+tp_lt_ts
+```
+	
+### Total nitrogen
+```{r}
+tn_lt_ts=plot_ly(data=lt_data[lt_data$param=='Nitrogen' & lt_data$ResultSampleFractionText=='Total',], type='box') %>%
+	add_trace(type='box', x=~year, y=~ResultMeasureValue, color=~AU_NAME) %>%
+	layout(title = "Total nitrogen",
+		boxmode = "group",
+		xaxis = list(title = "Year"),
+		yaxis = list(side = 'left', title = 'Total nitrogen (mg/L)', type = "log")
+	) %>% 
+	config(displaylogo = FALSE,
+		modeBarButtonsToRemove = c(
+			'sendDataToCloud',
+			'hoverClosestCartesian',
+			'hoverCompareCartesian',
+			'lasso2d',
+			'select2d'
+		)
+	)
+tn_lt_ts
+```
+
+### Chlorophyll a
+```{r}
+chla_lt_ts=plot_ly(data=lt_data[lt_data$param=='Chlorophyll a',], type='box') %>%
+	add_trace(type='box', x=~year, y=~ResultMeasureValue, color=~AU_NAME) %>%
+	layout(title = "Chlorophyll a",
+		boxmode = "group",
+		xaxis = list(title = "Year"),
+		yaxis = list(side = 'left', title = 'Chlorophyll a (ug/L)', type = "log")
+	) %>% 
+	config(displaylogo = FALSE,
+		modeBarButtonsToRemove = c(
+			'sendDataToCloud',
+			'hoverClosestCartesian',
+			'hoverCompareCartesian',
+			'lasso2d',
+			'select2d'
+		)
+	)
+chla_lt_ts
+```
+
+### Salinity
+```{r}
+salt_lt_ts=plot_ly(data=lt_data[lt_data$param=='Salinity' & ResultMeasureValue <500,], type='box') %>%
+	add_trace(type='box', x=~year, y=~ResultMeasureValue, color=~AU_NAME) %>%
+	layout(title = "Salinity",
+		boxmode = "group",
+		xaxis = list(title = "Year"),
+		yaxis = list(side = 'left', title = 'Salinity (g/L or ppt)', type = "log")
+	) %>% 
+	config(displaylogo = FALSE,
+		modeBarButtonsToRemove = c(
+			'sendDataToCloud',
+			'hoverClosestCartesian',
+			'hoverCompareCartesian',
+			'lasso2d',
+			'select2d'
+		)
+	)
+salt_lt_ts
+```

@@ -6,7 +6,8 @@ gb_elev=subset(elevation, site_no == 10010000)
 gb_elev=gb_elev[,c('Date','elev_ft')]
 
 wq_data_flat_elev=merge(wq_data_flat, gb_elev, all.x=T, by.x='sample_dt', by.y='Date')
-wq_data_flat_elev=wq_data_flat_elev[wq_data_flat_elev$rel_depth=='Surface',]
+wq_data_flat_elev=wq_data_flat_elev[wq_data_flat_elev$rel_depth=='Surface' & !is.na(wq_data_flat_elev$elev_ft),]
+
 
 ```
 

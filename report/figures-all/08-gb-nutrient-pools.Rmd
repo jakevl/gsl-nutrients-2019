@@ -1,0 +1,53 @@
+# Gilbert Bay nutrient pool calculations {#gb-nut-pools}
+Following the approach from Naftz et al. 2017 to calculate DBL & UBL volumes and constituent masses.
+
+## Compare JVL dissolved (filtered) nitrogen pool estimates to Naftz 2017
+```{r, echo=F, fig.cap = "JVL (y-axis) versus Naftz 2017 (x-axis) estimates for dissolved (filtered) nitrogen pools in Gilbert Bay total (top left), deep brine layer (DBL, top right), and upper brine layer (UBL, bottom left).", fig.width=8, fig.height=8}
+par(mfrow=c(2,2))
+plot(tot_mass_kg~DN_total_kg, comp, main='Gilbert Bay dissolved nitrogen pool (kg)', xlab='Natz 2017 estimate', ylab='JVL estimate', cex=1.5)
+abline(0,1, lty=2)
+plot(DBL_mass_kg~DN_DBL_kg, comp, main='DBL dissolved nitrogen pool (kg)', xlab='Natz 2017 estimate', ylab='JVL estimate', cex=1.5)
+abline(0,1, lty=2)
+plot(UBL_mass_kg~DN_UBL_kg, comp, main='UBL dissolved nitrogen pool (kg)', xlab='Natz 2017 estimate', ylab='JVL estimate', cex=1.5)
+abline(0,1, lty=2)
+```
+
+```{r, echo=F, fig.cap = "JVL vs. Naftz dissolved nitrogen pool estimates.", fig.width=8, fig.height=6}
+jvl_dn_comp
+```
+
+## Mass plots for all constituents
+### Total nitrogen
+```{r, echo=F, fig.cap = "Gilbert Bay total nitrogen pool.", fig.width=8}
+tn_mass_plot
+```
+
+### Filtered (dissolved) nitrogen
+```{r, echo=F, fig.cap = "Gilbert Bay filtered nitrogen pool.", fig.width=8}
+fn_mass_plot
+```
+
+### Total phosphorus
+```{r, echo=F, fig.cap = "Gilbert Bay total phosphorus pool.", fig.width=8}
+tp_mass_plot
+```
+
+### Filtered (dissolved) phosphorus
+```{r, echo=F, fig.cap = "Gilbert Bay filtered phosphorus pool.", fig.width=8}
+fp_mass_plot
+```
+
+### Salt
+```{r, echo=F, fig.cap = "Gilbert Bay salt pool.", fig.width=8}
+salt_mass_plot
+```
+
+### Chlorophyll a
+```{r, echo=F, fig.cap = "Gilbert Bay chlorophyll a pool.", fig.width=8}
+chla_mass_plot
+```
+
+
+
+
+

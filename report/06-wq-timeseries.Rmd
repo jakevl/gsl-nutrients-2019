@@ -265,7 +265,6 @@ chla_boxplot_month
 
 ```
 
-
 ## Bottom:Surface ratio timeseries
 ```{r, bs-ts}
 

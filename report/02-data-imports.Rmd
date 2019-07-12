@@ -18,7 +18,7 @@ elevation=dplyr::rename(elevation, elev_ft=X_62614_00003)
 
 ### Read discharge gauges
 ```{r, read-discharge, cache=T}
-discharge=dataRetrieval::readNWISuv(siteNumbers=site_list$SiteNumber[site_list$SiteType=="Discharge gauge"],parameterCd="00060", tz="America/Denver", startDate = "2010-01-01", endDate = "2018-12-31")
+discharge=dataRetrieval::readNWISuv(siteNumbers=site_list$SiteNumber[site_list$SiteType=="Discharge gauge"],parameterCd="00060", tz="America/Denver", startDate = "2010-01-01", endDate = Sys.Date())
 discharge=dplyr::rename(discharge, discharge_cfs=X_00060_00000, )
 summary(discharge)
 ```
@@ -34,8 +34,8 @@ discharge=rbind(discharge,brb_dis)
 ## Lake & tributary water quality data
 
 ```{r, read-wq, cache=T}
-wq_data=dataRetrieval::readNWISqw(expanded=F,tz="America/Denver",startDate="01-01-2010", endDate="12-31-2018",
-		siteNumbers=site_list$SiteNumber[site_list$SiteType %in% c("Lake", "Discharge gauge", "Causeway breach")],
+wq_data=dataRetrieval::readNWISqw(expanded=F,tz="America/Denver",startDate="01-01-2010", endDate=Sys.Date(),
+		siteNumbers=site_list$SiteNumber[site_list$SiteType %in% c("Lake", "Lake, DBL", "Discharge gauge", "Causeway breach")],
 		parameterCd=c(
 			"00098",			
 			"00665",
@@ -55,28 +55,15 @@ wq_data=dplyr::rename(wq_data,
 	Filtered_nitrogen_mgL=p62854,
 	Total_nitrogen_mgL=p62855,
 	Salinity_gL=p70305)#,
-	#Salinity2_gL=p00480)
-
-
-#plot_ly(wq_data, x=~sample_dt) %>%
-#	add_markers(y=~Salinity_gL, name='Salinity (g/L) p70305', marker=list(size=15, opacity=0.8)) %>%
-#	add_markers(y=~Salinity2_gL, name='Salinity (g/L) p00480', marker=list(size=15, opacity=0.8)) %>%
-#	layout(title = "GSL salinity - all sites",
-#		xaxis = list(title = ""),
-#		yaxis = list(side = 'left', title = 'Salinity (g/L)'),
-#		legend = list(x = 0.65, y = 0.9)
-#	) %>% 
-#	config(displaylogo = FALSE,
-#		modeBarButtonsToRemove = c(
-#			'sendDataToCloud',
-#			'hoverClosestCartesian',
-#			'hoverCompareCartesian',
-#			'lasso2d',
-#			'select2d'
-#		)
-#	)
 ```
 
+***Note - removing a few anomolously high data points TP > 8 & TN > 40. These appeared to be outliers based on figures in previous versions.
+```{r, rem-anom}
+wq_data=within(wq_data, {
+	Total_phosphorus_mgL[Total_phosphorus_mgL>8] = NA
+	Total_nitrogen_mgL[Total_nitrogen_mgL>40] = NA
+})
+```
 
 ```{r, rel-depth}
 ## Define surface and bottom samples, add month

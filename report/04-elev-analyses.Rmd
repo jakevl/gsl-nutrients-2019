@@ -8,9 +8,9 @@ elev_plot=
 		add_lines(y=~elev_ft, x=~Date, name=~Bay) %>%
 		layout(title = "GSL Water surface elevation",
 			xaxis = list(title = ""),
-			yaxis = list(side = 'left', title = 'Elevation (ft)')
+			yaxis = list(title = 'Gilbert Bay WSE (feet)')
 		) %>% 
-		config(displaylogo = FALSE, collaborate = FALSE,
+		config(displaylogo = FALSE,
 			modeBarButtonsToRemove = c(
 				'sendDataToCloud',
 				'hoverClosestCartesian',
