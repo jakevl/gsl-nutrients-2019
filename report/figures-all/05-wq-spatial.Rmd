@@ -4,6 +4,9 @@
 ```{r, echo=F, fig.cap = "Salinity spatial variability, GSL salinity by bay.", fig.width=8}
 sal_boxplot_bay
 ```
+```{r, echo=F, fig.cap = "Salinity spatial variability, GSL salinity by site.", fig.width=8}
+sal_boxplot_site
+```
 
 ## Nutrients
 ```{r, echo=F, fig.cap = "Nutrient concentration spatial variability, GSL nutrient concentrations and ratios by bay.", fig.width=8}

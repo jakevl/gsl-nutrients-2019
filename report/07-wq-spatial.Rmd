@@ -3,6 +3,7 @@
 
 ## WQ boxplots by site
 ### Salinity
+#### Salinity by bay
 ```{r, sal-boxplot-bay}
 sal_boxplot_bay=
 	plot_ly(wq_data[!is.na(wq_data$rel_depth),], x=~Bay) %>% 
@@ -25,6 +26,29 @@ sal_boxplot_bay=
 sal_boxplot_bay
 
 ```
+#### Salinity by site
+```{r, sal-boxplot-site}
+sal_boxplot_site=
+	plot_ly(wq_data[!is.na(wq_data$rel_depth),]) %>% 
+		add_trace(type='box', y=~Salinity_gL, x=~site_no, color=~rel_depth) %>% 
+		layout(title = "GSL salinity by site",
+			boxmode = "group",
+			xaxis = list(title = ""),
+			yaxis = list(side = 'left', title = 'Salinity (g/L)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+
+sal_boxplot_site
+```
+
 
 ### Nutrients
 ```{r, nuts-boxplot-bay}

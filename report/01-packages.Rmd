@@ -7,5 +7,6 @@ devtools::install_github("utah-dwq/wqTools")
 library(wqTools)
 library(magrittr)
 library(plotly)
+library(leaflet)
 ```
 
