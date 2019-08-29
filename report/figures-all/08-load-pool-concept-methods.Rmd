@@ -42,6 +42,7 @@ generate estimates for all constituents.
 Nutrient loads for the four locations were estimated at a daily timestep from daily mean concentrations paired with daily mean discharge values using USGS loadest (package rloadest). Discharge values at the Bear River Bay 
 outflow were estimated by a regression equation from the Bear River and Corinne gauge following Naftz 2017. The rloadest function selBestModel() was used to select the best model for each constituent and site. The models 
 were then applied back to the calibration dataset to generate daily flux estimates which were then multiplied by 365.25 to estimate an annual load. The primary difference in methods here between these analyses and the Naftz 2017 
-analyses is the longer dataset available for calibrating the loading models.
+analyses is the longer dataset available for calibrating the loading models. Records associated with negative discharge values (which only occurred at FB outflow site). This prevents a 'double-counting' of nutrients into Gilbert Bay. 
+It is unclear how Naftz 2017 dealt with this. 
 
 
