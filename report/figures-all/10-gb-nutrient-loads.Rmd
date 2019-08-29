@@ -1,0 +1,29 @@
+# Gilbert Bay nutrient load calculations {#gb-nut-loads}
+
+## Nitrogen loads
+```{r, echo=F, fig.cap = "Total nitrogen load to Gilbert Bay.", fig.width=8, fig.height=6}
+tn_load_plot
+```
+
+```{r, echo=F, fig.cap = "Filtered nitrogen load to Gilbert Bay.", fig.width=8, fig.height=6}
+dn_load_plot
+```
+
+```{r, echo=F}
+ann_dn_load=aggregate(ann_load_kg~Period, subset(pred_loads, variable=='Filtered_nitrogen_mgL'), FUN='sum')
+ann_dn_load$ann_load_kg=ann_dn_load$ann_load_kg/1000000
+names(ann_dn_load)[names(ann_dn_load)=='ann_load_kg'] = 'Annual load (million kg)'
+knitr::kable(ann_dn_load, caption = 'Annual filtered nitrogen load estimates to Gilbert Bay.', digits=2)
+```
+
+## Phosphorus loads
+```{r, echo=F, fig.cap = "Total phosphorus load to Gilbert Bay.", fig.width=8, fig.height=6}
+tp_load_plot
+```
+
+```{r, echo=F, fig.cap = "Filtered phosphorus load to Gilbert Bay.", fig.width=8, fig.height=6}
+dp_load_plot
+```
+
+
+
