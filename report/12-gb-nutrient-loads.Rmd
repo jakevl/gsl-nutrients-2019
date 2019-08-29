@@ -9,7 +9,7 @@ load_data_flat=reshape2::melt(wq_data, id.vars=c("site_no", "station_nm", "Bay",
 							measure.vars=c("Total_phosphorus_mgL","Filtered_phosphorus_mgL","Filtered_nitrogen_mgL","Total_nitrogen_mgL"),
 							na.rm=T)
 
-load_data_flat=subset(load_data_flat, site_no %in% c('411403112200801','410401112134801','10010060','10141000','10172630'))
+load_data_flat=subset(load_data_flat, site_no %in% c('410401112134801','10010060','10141000','10172630'))
 ```
 
 ### Merge WQ & discharge data
@@ -30,7 +30,7 @@ load_data_daily=subset(load_data_daily, discharge_cfs>0)
 ```
 *** Note - removed records associated with negative discharge values (only occurred at FB outflow site). Unsure how Naftz 2017 dealt with this. This prevents a 'double-counting' of nutrients into Gilbert Bay. ***
 
-#### Loading models
+## Loading models
 ```{r, load-models}
 bestMod=function(data){
 	return(rloadest::selBestModel(constituent='value', data=data, flow = "discharge_cfs", dates = "sample_dt", conc.units="mg/L", criterion="AIC"))
@@ -38,7 +38,7 @@ bestMod=function(data){
 load_models=plyr::dlply(load_data_daily, c('site_no','station_nm','variable'), .fun=bestMod)
 ```
 
-#### Estimate loads
+## Estimate loads
 ```{r, load-est}
 pred_loads=data.frame(matrix(nrow=0,ncol=9))
 for(n in 1:length(load_models)){
@@ -57,7 +57,8 @@ for(n in 1:length(load_models)){
 }
 ```
 
-#### Load table
+## Loading analyses
+### Load table
 ```{r, load-table}
 pred_loads[sapply(pred_loads, is.character)] <- lapply(pred_loads[sapply(pred_loads, is.character)], as.factor)
 DT::datatable(pred_loads, rownames=FALSE, filter="top",
@@ -65,10 +66,108 @@ DT::datatable(pred_loads, rownames=FALSE, filter="top",
 	DT::formatRound(columns=c(3:8), digits=1)
 ```
 
-#### Annual DN load
-```{r}
+### Annual DN load
+```{r, ann-dn-load}
 ann_dn_load=aggregate(ann_load_kg~Period, subset(pred_loads, variable=='Filtered_nitrogen_mgL'), FUN='sum')
 knitr::kable(ann_dn_load)
 ```
 
-#### Load figures
+### Load figures
+```{r, load-figures}
+total=aggregate(ann_load_kg~variable+Period, pred_loads, FUN='sum')
+total$site_no='Total'
+pred_loads=plyr::rbind.fill(pred_loads,total)
+pred_loads=within(pred_loads, {
+	site=NA
+	site[site_no=='10010060']='Bear River'
+	site[site_no=='10141000']='Weber River'
+	site[site_no=='10172630']='Goggin Drain'
+	site[site_no=='410401112134801']='Farmington Bay'
+	site[site_no=='Total']='Total'
+	param=NA
+	param[variable=='Total_phosphorus_mgL']='Total phosphorus'
+	param[variable=='Filtered_phosphorus_mgL']='Filtered phosphorus'
+	param[variable=='Total_nitrogen_mgL']='Total nitrogen'
+	param[variable=='Filtered_nitrogen_mgL']='Filtered nitrogen'
+	year=as.numeric(gsub('CY ', '', Period))
+})
+
+tn_load_plot=
+	plot_ly(subset(pred_loads, param=='Total nitrogen'), x=~year) %>%
+		add_lines(y=~ann_load_kg, name=~site) %>%
+		layout(title = "Gilbert Bay annual total nitrogen loads",
+			xaxis = list(title = ""),
+			yaxis = list(title = 'Load (kg)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+tn_load_plot
+
+
+dn_load_plot=
+	plot_ly(subset(pred_loads, param=='Filtered nitrogen'), x=~year) %>%
+		add_lines(y=~ann_load_kg, name=~site) %>%
+		layout(title = "Gilbert Bay annual filtered nitrogen loads",
+			xaxis = list(title = ""),
+			yaxis = list(title = 'Load (kg)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+dn_load_plot
+
+
+tp_load_plot=
+	plot_ly(subset(pred_loads, param=='Total phosphorus'), x=~year) %>%
+		add_lines(y=~ann_load_kg, name=~site) %>%
+		layout(title = "Gilbert Bay annual total phosphorus loads",
+			xaxis = list(title = ""),
+			yaxis = list(title = 'Load (kg)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+tp_load_plot
+
+
+dp_load_plot=
+	plot_ly(subset(pred_loads, param=='Filtered phosphorus'), x=~year) %>%
+		add_lines(y=~ann_load_kg, name=~site) %>%
+		layout(title = "Gilbert Bay annual filtered phosphorus loads",
+			xaxis = list(title = ""),
+			yaxis = list(title = 'Load (kg)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+dp_load_plot
+
+
+```
+
+
