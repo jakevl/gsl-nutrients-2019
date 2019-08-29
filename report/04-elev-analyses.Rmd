@@ -1,3 +1,5 @@
+# (PART) Basic analyses & figures {-}
+
 # GSL Elevation {#elev-analyses}
 
 ```{r, elev-plot}

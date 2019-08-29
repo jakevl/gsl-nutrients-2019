@@ -101,7 +101,7 @@ chla_lt_ts
 
 ### Salinity
 ```{r}
-salt_lt_ts=plot_ly(data=lt_data[lt_data$param=='Salinity' & ResultMeasureValue <500,], type='box') %>%
+salt_lt_ts=plot_ly(data=lt_data[lt_data$param=='Salinity' & lt_data$ResultMeasureValue <500,], type='box') %>%
 	add_trace(type='box', x=~year, y=~ResultMeasureValue, color=~AU_NAME) %>%
 	layout(title = "Salinity",
 		boxmode = "group",

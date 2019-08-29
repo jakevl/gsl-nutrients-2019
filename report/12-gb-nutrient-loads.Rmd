@@ -1,0 +1,74 @@
+# Gilbert Bay nutrient load calculations {#gb-nut-loads}
+Following the approach from Naftz et al. 2017 to calculate constituent loads to Gilbert Bay.
+Note that the BRB outflow discharge was estimated from the Bear River at Corinne gauge as part of the data import process in chapter 2, 'Data imports'.
+
+## Setup
+### Flatten & subset to inflow sites
+```{r, load-setup1}
+load_data_flat=reshape2::melt(wq_data, id.vars=c("site_no", "station_nm", "Bay", "sample_dt", "sample_tm","dec_lat_va","dec_long_va", "month"),
+							measure.vars=c("Total_phosphorus_mgL","Filtered_phosphorus_mgL","Filtered_nitrogen_mgL","Total_nitrogen_mgL"),
+							na.rm=T)
+
+load_data_flat=subset(load_data_flat, site_no %in% c('411403112200801','410401112134801','10010060','10141000','10172630'))
+```
+
+### Merge WQ & discharge data
+#### Aggregate to daily values
+```{r, load-setup2}
+load_data_daily=aggregate(value~site_no+station_nm+sample_dt+variable, data=load_data_flat, FUN='mean')
+discharge_daily=aggregate(discharge_cfs~site_no+date, data=discharge, FUN='mean')
+names(discharge_daily)[names(discharge_daily)=='date']='sample_dt'
+```
+
+#### Merge
+```{r, load-setup3}
+dim(load_data_daily)
+load_data_daily=merge(load_data_daily, discharge_daily)
+dim(load_data_daily)
+boxplot(discharge_cfs~site_no, load_data_daily)
+load_data_daily=subset(load_data_daily, discharge_cfs>0)
+```
+*** Note - removed records associated with negative discharge values (only occurred at FB outflow site). Unsure how Naftz 2017 dealt with this. This prevents a 'double-counting' of nutrients into Gilbert Bay. ***
+
+#### Loading models
+```{r, load-models}
+bestMod=function(data){
+	return(rloadest::selBestModel(constituent='value', data=data, flow = "discharge_cfs", dates = "sample_dt", conc.units="mg/L", criterion="AIC"))
+}
+load_models=plyr::dlply(load_data_daily, c('site_no','station_nm','variable'), .fun=bestMod)
+```
+
+#### Estimate loads
+```{r, load-est}
+pred_loads=data.frame(matrix(nrow=0,ncol=9))
+for(n in 1:length(load_models)){
+	site=strsplit(names(load_models)[n], "[.]")[[1]][1]
+	stn=strsplit(names(load_models)[n], "[.]")[[1]][2]
+	var=strsplit(names(load_models)[n], "[.]")[[1]][3]
+	newdata=subset(load_data_daily, site_no==site, variable=var)
+	load=rloadest::predLoad(fit=load_models[[n]], newdata=newdata, by="calendar year", allow.incomplete = T)
+	load=within(load, {
+		site_no=site
+		station_nm=stn
+		variable=var
+		ann_load_kg=Flux*365.25
+	})
+	pred_loads=rbind(pred_loads, as.data.frame(load))
+}
+```
+
+#### Load table
+```{r, load-table}
+pred_loads[sapply(pred_loads, is.character)] <- lapply(pred_loads[sapply(pred_loads, is.character)], as.factor)
+DT::datatable(pred_loads, rownames=FALSE, filter="top",
+		options = list(scrollY = '600px', paging = FALSE, scrollX=TRUE, dom="ltipr")) %>%
+	DT::formatRound(columns=c(3:8), digits=1)
+```
+
+#### Annual DN load
+```{r}
+ann_dn_load=aggregate(ann_load_kg~Period, subset(pred_loads, variable=='Filtered_nitrogen_mgL'), FUN='sum')
+knitr::kable(ann_dn_load)
+```
+
+#### Load figures

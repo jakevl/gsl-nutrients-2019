@@ -1,8 +1,13 @@
+# (PART) Packages & data {-}
+
 # Package installs {#packages}
 ```{r, eval=F}
 install.packages(c("dataRetrieval","dplyr","DT", "devtools"))
 devtools::install_github("utah-dwq/wqTools")
+install.packages("rloadest")
 ```
+*** Note- rloadest must be installed via USGS repository. See [rloadest GitHub page](https://github.com/USGS-R/rloadest){target="_blank"} for more info. ***
+
 ```{r}
 library(wqTools)
 library(magrittr)
