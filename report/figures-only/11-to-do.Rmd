@@ -1,0 +1,24 @@
+# To do list
+
+## Characterize sampling error in pool estimates
+Current methods aggregate samples to mean monthly values to calculate pools. However, this masks 
+sampling variability among sites and may give an unrealistic sense of prediction error for load estimates. 
+One alternative would be to estimate UBL and DBL pools for each individual sample, rather than aggregating to a mean prior 
+to estimating pools. 
+This would allow the generation of prediction intervals and the ability to show plots that accurately reflect 
+variability in estimates (e.g. as boxplots or line plots with confidence intervals).
+
+## Compare pools & loads
+Characterize loads as a proportion of the pool. Which time steps are relevant for comparison?
+
+## Account for negative flows at FB
+Currently, negative flows at the FB outlet are removed before calculating loads. These could 
+be accounted for by generating loadest models for both positive and negative flows and subtracting.
+
+## UPRR bridge load analysis
+Constituent exchanges between Gilbert and Gunnison Bays at the UPRR bridge are currently unestimated. 
+Ideally these would be estimated from high frequency discharge measurements, but these are not currently 
+available. Alternatively, it may be possible to estimate positive and negative loads based on existing paired 
+field samples and discharge measurements.
+
+
