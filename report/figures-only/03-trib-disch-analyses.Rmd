@@ -16,3 +16,23 @@ disch_ts
 ```{r, echo=F, fig.cap = "Monthly inflow volumes at gauged GSL tributaries over time."}
 mon_inflow
 ```
+
+
+# Tributary water quality {#trib-wq-analyses}
+```{r, echo=F, fig.cap = "Total phosphorus in GSL tributaries by site."}
+trib_wq_tp
+```
+
+```{r, echo=F, fig.cap = "Total nitrogen in GSL tributaries by site."}
+trib_wq_tn
+```
+
+```{r, echo=F, fig.cap = "Total phosphorus in GSL tributaries by site and year."}
+trib_wq_yr_tp
+```
+
+```{r, echo=F, fig.cap = "Total nitrogen in GSL tributaries by site and year."}
+trib_wq_yr_tn
+```
+
+

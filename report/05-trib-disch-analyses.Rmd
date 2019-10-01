@@ -110,8 +110,89 @@ sum(ann_disch_mean$ann_inflow_af)
 
 
 
+# Tributary water quality {#trib-wq-analyses}
+```{r}
+trib_wq=subset(wq_data, SiteType %in% c('Causeway breach', 'Discharge gauge'))
+trib_wq$year=lubridate::year(trib_wq$sample_dt)
 
 
+trib_wq_tp=
+	plot_ly(trib_wq, x=~station_nm) %>% 
+		add_trace(type='box', y=~Total_phosphorus_mgL) %>% 
+		layout(title = "Tributary total phosphorus",
+			boxmode = "group",
+			xaxis = list(title = ""),
+			yaxis = list(side = 'left', title = 'Concentration (ug/L)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+trib_wq_tp
+
+trib_wq_tn=
+	plot_ly(trib_wq, x=~station_nm) %>% 
+		add_trace(type='box', y=~Total_nitrogen_mgL) %>% 
+		layout(title = "Tributary total nitrogen",
+			boxmode = "group",
+			xaxis = list(title = ""),
+			yaxis = list(side = 'left', title = 'Concentration (ug/L)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+trib_wq_tn
+
+
+trib_wq_yr_tp=
+	plot_ly(trib_wq, x=~year) %>% 
+		add_trace(type='box', y=~Total_phosphorus_mgL, color=~station_nm) %>% 
+		layout(title = "Tributary total phosphorus",
+			boxmode = "group",
+			xaxis = list(title = ""),
+			yaxis = list(side = 'left', title = 'Concentration (ug/L)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+trib_wq_yr_tp
+
+trib_wq_yr_tn=
+	plot_ly(trib_wq, x=~year) %>% 
+		add_trace(type='box', y=~Total_nitrogen_mgL, color=~station_nm) %>% 
+		layout(title = "Tributary total nitrogen",
+			boxmode = "group",
+			xaxis = list(title = ""),
+			yaxis = list(side = 'left', title = 'Concentration (ug/L)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+trib_wq_yr_tn
+```
 
 
 

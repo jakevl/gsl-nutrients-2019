@@ -10,12 +10,17 @@ fig_caption: yes
 
 # Introduction {-}
 This is a figures only version of a set of GSL water quality and nutrient analyses. All data are drawn from USGS NWIS or EPA WQP.  
-For details and code see: [bookdown.org/jakevl/gsl-nutrients-2019](https://bookdown.org/jakevl/gsl-nutrients-2019/){target="_blank"}  
+For details and code see: [bookdown.org/jakevl/gsl-nutrients](https://bookdown.org/jakevl/gsl-nutrients){target="_blank"}  
 
-This project remains in active development and does not represent any official agency position.
+This project remains in active development and does not represent any official agency position.  
+
+The first section, 'Basic analyses & figures', provides a set of contextual figures meant to characterize spatial and temporal variability of important water quality, 
+lake elevation, and tributary discharge parameters.  
+
+The second section, 'Nutrient pools & loads', documents the methods and results for estimating nutrient pools in and loads to Gilbert Bay.
 
 ```{r, echo=F}
-#setwd("C:/Users/jvander/Documents/R/gsl_nutrient_report_2019/report/figures-all")
+#setwd("C:/Users/jvander/Documents/R/gsl_nutrient_report_2019/report/figures-only")
 load('figures.RData')
 ```
 

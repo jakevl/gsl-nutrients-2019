@@ -25,13 +25,13 @@ the Weber River, and the Goggin Drain. Nutrient exchanges at the UPRR causeway b
 The objective of these analyses was to replicate and expand on the work of Naftz 2017 while also generalizing and automating the process to include multiple constituents and 
 a wider spatial and temporal dataset. As such, the core methods are only generalized here with important deviations noted.  
 
-All data included in these analyses are publically available and were queried from either USGS NWIS.
+All data included in these analyses are publically available from either USGS NWIS or EPA WQP.
 
 ### Gilbert Bay nutrient pool estimates
 Nutrient concentrations were estimated for Gilbert Bay by aggregating samples collected from the upper and deep brine layers to mean monthly values. DBL samples were defined as those occurring at sites 405356112205601 or 410644112382601 
-and with sampling depth >= 5 meters (see map). UBL samples were defined as any sample in Gilbert Bay >= 2 meters sampling depth. Gilbert Bay brine layer volumes were estimated from observed Gilbert Bay elevations via formulas presented in 
+and with sampling depth >= 5 meters (see map). UBL samples were defined as any sample in Gilbert Bay <= 2 meters sampling depth. Gilbert Bay brine layer volumes were estimated from observed Gilbert Bay elevations via formulas presented in 
 Naftz 2017. DBL and UBL nutrient pool masses were estimated by multiplying the mean monthly concentrations by mean monthly water volume estimates. There are two main differences between these estimates and the original estimates of Naftz 2017.
-First, these estimates include samples collected at any site in Gilbert Bay whereas the Naftz 2017 estimates included a subset of site locations. Second, Naftz 2017 filled gaps in sample availability by rolling forward the concentrations 
+First, these estimates include samples collected at any site in Gilbert Bay whereas the Naftz 2017 estimates were restricted to a subset of site locations. Second, Naftz 2017 filled gaps in sample availability by rolling forward the concentrations 
 observed at a site in a previous month. This process was not performed in this analysis.  
   
 The estimates from this process were then compared to those produced in Naftz 2017 as a validation step, and then the same methods were applied to both total and dissolved nitrogen and phosphorus as well as salinity to 

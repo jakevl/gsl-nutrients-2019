@@ -1,5 +1,4 @@
 # Gilbert Bay nutrient pool calculations {#gb-nut-pools}
-Following the approach from Naftz et al. 2017 to calculate DBL & UBL volumes and constituent masses.
 
 ## Compare JVL dissolved (filtered) nitrogen pool estimates to Naftz 2017
 ```{r, echo=F, fig.cap = "JVL (y-axis) versus Naftz 2017 (x-axis) estimates for dissolved (filtered) nitrogen pools in Gilbert Bay total (top left), deep brine layer (DBL, top right), and upper brine layer (UBL, bottom left).", fig.width=8, fig.height=8}
