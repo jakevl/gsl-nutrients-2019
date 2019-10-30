@@ -22,9 +22,11 @@ gb_elev_vol=within(gb_elev_vol, {
 	month=lubridate::month(Date)
 })
 
-DBL_vol_YrMo=aggregate(DBL_vol_total_m3~year+month,FUN='mean',gb_elev_vol)
+DBLn_vol_YrMo=aggregate(DBL_vol_N_m3~year+month,FUN='mean',gb_elev_vol)
+DBLs_vol_YrMo=aggregate(DBL_vol_S_m3~year+month,FUN='mean',gb_elev_vol)
 UBL_vol_YrMo=aggregate(UBL_vol_m3~year+month,FUN='mean',gb_elev_vol)
-gb_vol_YrMo=merge(UBL_vol_YrMo,DBL_vol_YrMo,by=c("year","month"))
+gb_vol_YrMo=merge(UBL_vol_YrMo,DBLn_vol_YrMo,by=c("year","month"))
+gb_vol_YrMo=merge(gb_vol_YrMo,DBLs_vol_YrMo,by=c("year","month"))
 ```
 
 ## ID WQ samples as UBL or DBL representatives
@@ -34,10 +36,13 @@ Defined UBL samples as any sample in Gilbert Bay >= 2 meters sampling depth.
 ```{r, ubl-dbl}
 wq_data_flat=within(wq_data_flat, {
 	bl=NA
-	bl[(site_no==405356112205601 | site_no== 410644112382601) & Sampling_depth_m >=5] = 'DBL'
+	bl[site_no==405356112205601 & Sampling_depth_m >=5] = 'DBLs'
+	bl[site_no==410644112382601 & Sampling_depth_m >=5] = 'DBLn'
 	bl[Bay=='Gilbert' & Sampling_depth_m <=2] = 'UBL'
 })
 ```
+
+
 
 ## Put all constituents in same units (mg/L) to simplify calculations
 ```{r, pool-units}
@@ -57,12 +62,8 @@ knitr::kable(table(gb_pool_wq_data$variable))
 ## Calculate monthly means & SDs for UBL & DBL WQ parameters
 ```{r, calc-mon}
 mon_means=aggregate(value~year+month+variable+param+bl, gb_pool_wq_data, FUN='mean')
-mon_sd=aggregate(value~year+month+variable+param+bl, gb_pool_wq_data, FUN='sd')
 mon_means=reshape2::dcast(mon_means, year+month+variable+param~bl, value.var='value')
-mon_sd=reshape2::dcast(mon_sd, year+month+variable+param~bl, value.var='value')
-mon_means=dplyr::rename(mon_means, DBL_mean=DBL, UBL_mean=UBL)
-mon_sd=dplyr::rename(mon_sd, DBL_sd=DBL, UBL_sd=UBL)
-mon_means=merge(mon_means, mon_sd)
+mon_means=dplyr::rename(mon_means, DBL_mean_s=DBLs, DBL_mean_n=DBLn, UBL_mean=UBL)
 ```
 
 ## Merge monthly WQ means & monthly volume estimates
@@ -74,7 +75,7 @@ gb_pool_data=merge(gb_vol_YrMo, mon_means)
 ```{r, calc-mass}
 gb_pool_data=within(gb_pool_data, {
 	UBL_mass_kg=UBL_vol_m3*UBL_mean*0.001
-	DBL_mass_kg=DBL_vol_total_m3*DBL_mean*0.001
+	DBL_mass_kg=(DBL_mean_n*DBL_vol_N_m3 + DBL_mean_s*DBL_vol_S_m3)*0.001
 	tot_mass_kg=DBL_mass_kg+UBL_mass_kg
 	YrMo=as.Date(paste0(year,"-",month,"-01"),format='%Y-%m-%d')
 })
@@ -94,8 +95,8 @@ plot(UBL_mass_kg~DN_UBL_kg, comp, main='UBL dissolved nitrogen pool (kg)', xlab=
 abline(0,1, lty=2)
 comp=comp[order(comp$YrMo),]
 jvl_dn_comp=plot_ly(data=comp) %>%
-	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, name='JVL', mode='lines+markers') %>%
-	add_trace(type='scatter', y=~DN_total_kg, x=~YrMo, name='Naftz', mode='lines+markers') %>%
+	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, name='JVL', mode='lines+markers', marker = list(color = cols[[3]][[1]],size = 10,line = list(color = cols[[3]][[2]],width = 2)), line = list(color = cols[[3]][[2]],width = 2)) %>%
+	add_trace(type='scatter', y=~DN_total_kg, x=~YrMo, name='Naftz', mode='lines+markers', marker = list(symbol=2, color = cols[[6]][[1]],size = 10,line = list(color = cols[[6]][[2]],width = 2)), line = list(color = cols[[6]][[2]],width = 2)) %>%
 	layout(title = "Gilbert Bay filtered nitrogen pool (UBL + DBL)",
 		xaxis = list(title = ""),
 		yaxis = list(side = 'left', title = 'Filtered nitrogen mass (kg)')
@@ -117,9 +118,9 @@ jvl_dn_comp
 ### Total nitrogen
 ```{r, tn-mass-plot}
 tn_mass_plot=plot_ly(data=gb_pool_data[gb_pool_data$param=='Total nitrogen',]) %>%
-	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, mode = 'lines+markers', name='Total') %>%
-	add_trace(type='scatter', y=~DBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Deep brine layer') %>%
-	add_trace(type='scatter', y=~UBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Upper brine layer') %>%
+	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, mode = 'lines+markers', name='Total', marker = list(color = cols[[3]][[1]],size = 10,line = list(color = cols[[3]][[2]],width = 2)), line = list(color = cols[[3]][[2]],width = 2)) %>%
+	add_trace(type='scatter', y=~DBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Deep brine layer', name='Deep brine layer', marker = list(symbol=2, color = cols[[6]][[1]],size = 10,line = list(color = cols[[6]][[2]],width = 2)), line = list(color = cols[[6]][[2]],width = 2)) %>%
+	add_trace(type='scatter', y=~UBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Upper brine layer', marker = list(symbol=4, color = cols[[7]][[1]],size = 10,line = list(color = cols[[7]][[2]],width = 2)),line = list(color = cols[[7]][[2]],width = 2)) %>%
 	layout(title = "Gilbert Bay total nitrogen pool",
 		xaxis = list(title = "", range=c(min(gb_pool_data$YrMo), max(gb_pool_data$YrMo))),
 		yaxis = list(side = 'left', title = 'Total nitrogen mass (kg)')
@@ -139,9 +140,9 @@ tn_mass_plot
 ### Filtered (dissolved) nitrogen
 ```{r, fn-mass-plot}
 fn_mass_plot=plot_ly(data=gb_pool_data[gb_pool_data$param=='Filtered nitrogen',]) %>%
-	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, mode = 'lines+markers', name='Total') %>%
-	add_trace(type='scatter', y=~DBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Deep brine layer') %>%
-	add_trace(type='scatter', y=~UBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Upper brine layer') %>%
+	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, mode = 'lines+markers', name='Total', marker = list(color = cols[[3]][[1]],size = 10,line = list(color = cols[[3]][[2]],width = 2)), line = list(color = cols[[3]][[2]],width = 2)) %>%
+	add_trace(type='scatter', y=~DBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Deep brine layer', marker = list(symbol=2, color = cols[[6]][[1]],size = 10,line = list(color = cols[[6]][[2]],width = 2)), line = list(color = cols[[6]][[2]],width = 2)) %>%
+	add_trace(type='scatter', y=~UBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Upper brine layer', marker = list(symbol=4, color = cols[[7]][[1]],size = 10,line = list(color = cols[[7]][[2]],width = 2)),line = list(color = cols[[7]][[2]],width = 2)) %>%
 	layout(title = "Gilbert Bay filtered nitrogen pool",
 		xaxis = list(title = "", range=c(min(gb_pool_data$YrMo), max(gb_pool_data$YrMo))),
 		yaxis = list(side = 'left', title = 'Filtered nitrogen mass (kg)')
@@ -161,9 +162,9 @@ fn_mass_plot
 ### Total phosphorus
 ```{r, tp-mass-plot}
 tp_mass_plot=plot_ly(data=gb_pool_data[gb_pool_data$param=='Total phosphorus',]) %>%
-	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, mode = 'lines+markers', name='Total') %>%
-	add_trace(type='scatter', y=~DBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Deep brine layer') %>%
-	add_trace(type='scatter', y=~UBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Upper brine layer') %>%
+	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, mode = 'lines+markers', name='Total', marker = list(color = cols[[3]][[1]],size = 10,line = list(color = cols[[3]][[2]],width = 2)), line = list(color = cols[[3]][[2]],width = 2)) %>%
+	add_trace(type='scatter', y=~DBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Deep brine layer', marker = list(symbol=2, color = cols[[6]][[1]],size = 10,line = list(color = cols[[6]][[2]],width = 2)), line = list(color = cols[[6]][[2]],width = 2)) %>%
+	add_trace(type='scatter', y=~UBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Upper brine layer', marker = list(symbol=4, color = cols[[7]][[1]],size = 10,line = list(color = cols[[7]][[2]],width = 2)),line = list(color = cols[[7]][[2]],width = 2)) %>%
 	layout(title = "Gilbert Bay total phosphorus pool",
 		xaxis = list(title = "", range=c(min(gb_pool_data$YrMo), max(gb_pool_data$YrMo))),
 		yaxis = list(side = 'left', title = 'Total phosphorus mass (kg)')
@@ -183,9 +184,9 @@ tp_mass_plot
 ### Filtered (dissolved) phosphorus
 ```{r, fp-mass-plot}
 fp_mass_plot=plot_ly(data=gb_pool_data[gb_pool_data$param=='Filtered phosphorus',]) %>%
-	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, mode = 'lines+markers', name='Total') %>%
-	add_trace(type='scatter', y=~DBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Deep brine layer') %>%
-	add_trace(type='scatter', y=~UBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Upper brine layer') %>%
+	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, mode = 'lines+markers', name='Total', marker = list(color = cols[[3]][[1]],size = 10,line = list(color = cols[[3]][[2]],width = 2)), line = list(color = cols[[3]][[2]],width = 2)) %>%
+	add_trace(type='scatter', y=~DBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Deep brine layer', marker = list(symbol=2, color = cols[[6]][[1]],size = 10,line = list(color = cols[[6]][[2]],width = 2)), line = list(color = cols[[6]][[2]],width = 2)) %>%
+	add_trace(type='scatter', y=~UBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Upper brine layer', marker = list(symbol=4, color = cols[[7]][[1]],size = 10,line = list(color = cols[[7]][[2]],width = 2)),line = list(color = cols[[7]][[2]],width = 2)) %>%
 	layout(title = "Gilbert Bay filtered phosphorus pool",
 		xaxis = list(title = "", range=c(min(gb_pool_data$YrMo), max(gb_pool_data$YrMo))),
 		yaxis = list(side = 'left', title = 'Filtered phosphorus mass (kg)')
@@ -205,9 +206,9 @@ fp_mass_plot
 ### Salt
 ```{r, salt-mass-plot}
 salt_mass_plot=plot_ly(data=gb_pool_data[gb_pool_data$param=='Salinity',]) %>%
-	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, mode = 'lines+markers', name='Total') %>%
-	add_trace(type='scatter', y=~DBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Deep brine layer') %>%
-	add_trace(type='scatter', y=~UBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Upper brine layer') %>%
+	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, mode = 'lines+markers', name='Total', marker = list(color = cols[[3]][[1]],size = 10,line = list(color = cols[[3]][[2]],width = 2)), line = list(color = cols[[3]][[2]],width = 2)) %>%
+	add_trace(type='scatter', y=~DBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Deep brine layer', marker = list(symbol=2, color = cols[[6]][[1]],size = 10,line = list(color = cols[[6]][[2]],width = 2)), line = list(color = cols[[6]][[2]],width = 2)) %>%
+	add_trace(type='scatter', y=~UBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Upper brine layer', marker = list(symbol=4, color = cols[[7]][[1]],size = 10,line = list(color = cols[[7]][[2]],width = 2)),line = list(color = cols[[7]][[2]],width = 2)) %>%
 	layout(title = "Gilbert Bay salt pool",
 		xaxis = list(title = "", range=c(min(gb_pool_data$YrMo), max(gb_pool_data$YrMo))),
 		yaxis = list(side = 'left', title = 'Salt mass (kg)')
@@ -227,9 +228,9 @@ salt_mass_plot
 ### Chlorophyll a
 ```{r, chla-mass-plot}
 chla_mass_plot=plot_ly(data=gb_pool_data[gb_pool_data$param=='Chlorophyll a',]) %>%
-	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, mode = 'lines+markers', name='Total') %>%
-	add_trace(type='scatter', y=~DBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Deep brine layer') %>%
-	add_trace(type='scatter', y=~UBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Upper brine layer') %>%
+	add_trace(type='scatter', y=~tot_mass_kg, x=~YrMo, mode = 'lines+markers', name='Total', marker = list(color = cols[[3]][[1]],size = 10,line = list(color = cols[[3]][[2]],width = 2)), line = list(color = cols[[3]][[2]],width = 2)) %>%
+	add_trace(type='scatter', y=~DBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Deep brine layer', marker = list(symbol=2, color = cols[[6]][[1]],size = 10,line = list(color = cols[[6]][[2]],width = 2)), line = list(color = cols[[6]][[2]],width = 2)) %>%
+	add_trace(type='scatter', y=~UBL_mass_kg, x=~YrMo, mode = 'lines+markers', name='Upper brine layer', marker = list(symbol=4, color = cols[[7]][[1]],size = 10,line = list(color = cols[[7]][[2]],width = 2)),line = list(color = cols[[7]][[2]],width = 2)) %>%
 	layout(title = "Gilbert Bay chlorophyll a pool",
 		xaxis = list(title = "", range=c(min(gb_pool_data$YrMo), max(gb_pool_data$YrMo))),
 		yaxis = list(side = 'left', title = 'Chlorophyll a mass (kg)')

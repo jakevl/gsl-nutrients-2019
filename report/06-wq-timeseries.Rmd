@@ -4,17 +4,21 @@
 cols=list(
 	list('rgba(60, 230, 70, 0.5)','rgb(60, 230, 70)'),
 	list('rgba(230, 200, 50, 0.5)','rgb(230, 200, 50)'),
-	list('rgba(30, 50, 195, 0.5)','rgb(30, 50, 195)'),
+	list('rgba(15, 32, 128, 0.5)','rgb(15, 32, 128)'),
 	list('rgba(200, 30, 30, 0.5)','rgb(200, 30, 30)'),
-	list('rgba(195, 30, 200, 0.5)','rgb(195, 30, 200)')
+	list('rgba(195, 30, 200, 0.5)','rgb(195, 30, 200)'),
+	list('rgba(245, 121, 58, 0.5)','rgb(245, 121, 58)'),
+	list('rgba(169, 90, 161, 0.5)','rgb(169, 90, 161)')
 	)
 ```
+
+
 
 ## Create flat data (for certain boxplots)
 ```{r, wq-flatten}
 
 wq_data_flat=reshape2::melt(wq_data, id.vars=c("site_no", "station_nm", "Bay", "sample_dt", "sample_tm", "rel_depth", "Sampling_depth_m","dec_lat_va","dec_long_va", "month"),
-							measure.vars=c("Salinity_gL", "Chlorophyll_a_ugL", "Total_phosphorus_mgL","Filtered_phosphorus_mgL","Filtered_nitrogen_mgL","Total_nitrogen_mgL", "TN_TP","FN_FP"),
+							measure.vars=c("Salinity_gL", "Chlorophyll_a_ugL", "Total_phosphorus_mgL","Filtered_phosphorus_mgL","Filtered_nitrogen_mgL","Total_nitrogen_mgL", "TN_TP","FN_FP","Density_gcm3","SpecCond_uScm"),
 							na.rm=T)
 
 wq_data_flat=wq_data_flat[!is.na(wq_data_flat$Bay) & !is.na(wq_data_flat$rel_depth),]
@@ -37,19 +41,22 @@ wq_data_flat=within(wq_data_flat,{
 ### Time series
 ```{r, salinity-ts}
 gsl_sal_ts=
-	plot_ly(data=wq_data, x=~sample_dt) %>%
-		add_markers(data=wq_data[wq_data$rel_depth=="Bottom",], x=~sample_dt, y=~Salinity_gL, name="Bottom", visible=T,
-			marker = list(color = cols[[1]][[1]],size = 10,line = list(color = cols[[1]][[2]],width = 2))
+	plot_ly(x=~sample_dt) %>%
+		add_markers(data=wq_data[wq_data$rel_depth=="Bottom" & wq_data$Bay=="Gilbert",], x=~sample_dt, y=~Salinity_gL, name="Bottom", visible=T,
+			text=~site_no,
+			marker = list(color = cols[[3]][[1]],size = 10,line = list(color = cols[[3]][[2]],width = 2))
 		) %>% 
-		add_markers(data=wq_data[wq_data$rel_depth=="Surface",], x=~sample_dt, y=~Salinity_gL, name="Surface", visible=T, 
-			marker = list(symbol=2, color = cols[[2]][[1]],size = 10,line = list(color = cols[[2]][[2]],width = 2))
+		add_markers(data=wq_data[wq_data$rel_depth=="Surface" & wq_data$Bay=="Gilbert",], x=~sample_dt, y=~Salinity_gL, name="Surface", visible=T, 
+			text=~site_no,
+			marker = list(symbol=2, color = cols[[6]][[1]],size = 10,line = list(color = cols[[6]][[2]],width = 2))
 		) %>%
+
 		layout(
-			title = "GSL salinity timeseries",
+			title = "Gilbert Bay salinity timeseries",
 			xaxis = list(title = ""),
 			yaxis = list(side = 'left', title = 'Concentration (g/L)')
 		) %>% 
-		config(displaylogo = FALSE, collaborate = FALSE,
+		config(displaylogo = FALSE,
 			modeBarButtonsToRemove = c(
 				'sendDataToCloud',
 				'hoverClosestCartesian',
@@ -61,6 +68,12 @@ gsl_sal_ts=
 
 gsl_sal_ts	
 ```
+
+
+
+
+
+
 
 ### Seasonal
 ```{r, sal-seasonal}

@@ -10,7 +10,7 @@ elev_plot=
 		add_lines(y=~elev_ft, x=~Date, name=~Bay) %>%
 		layout(title = "GSL Water surface elevation",
 			xaxis = list(title = ""),
-			yaxis = list(title = 'Gilbert Bay WSE (feet)')
+			yaxis = list(title = 'WSE (feet)')
 		) %>% 
 		config(displaylogo = FALSE,
 			modeBarButtonsToRemove = c(

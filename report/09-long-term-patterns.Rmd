@@ -119,3 +119,58 @@ salt_lt_ts=plot_ly(data=lt_data[lt_data$param=='Salinity' & lt_data$ResultMeasur
 	)
 salt_lt_ts
 ```
+
+
+```{r}
+sal_elev_lt=subset(lt_data, CharacteristicName=='Salinity' & AU_NAME=='Gilbert Bay' & ActivityDepthHeightMeasure.MeasureValue<=1 & ResultMeasureValue<=200 & ResultMeasureValue>20 & OrganizationIdentifier=='USGS-UT')
+sal_elev_lt$ActivityStartDate=as.Date(sal_elev_lt$ActivityStartDate)
+sal_elev_lt=merge(sal_elev_lt, gb_elev, by.x='ActivityStartDate', by.y='Date')
+
+sal_elev_lt=within(sal_elev_lt, {
+	pre_post=NA
+	pre_post[year<2011]="prepre"
+	pre_post[year>=2011 & year<=2016]="pre"
+	pre_post[year>=2017]="post"
+})
+
+prepre=subset(sal_elev_lt, pre_post=="prepre")
+pre=subset(sal_elev_lt, pre_post=="pre")
+post=subset(sal_elev_lt, pre_post=="post")
+sal_elev_plot_lt=
+	plot_ly() %>% 
+		add_markers(data=prepre, x=~elev_ft, y=~ResultMeasureValue, color=~as.factor(pre_post), name="Pre-2010",
+			marker = list(color = cols[[3]][[1]],size = 10,line = list(color = cols[[3]][[2]],width = 2))
+		) %>%
+		add_lines(data=prepre, x=~elev_ft, y=fitted(lm(ResultMeasureValue~elev_ft, prepre)), name='Pre-2010 regression',
+			line = list(color = cols[[3]][[2]],width = 2)
+		) %>% 
+		add_markers(data=pre, x=~elev_ft, y=~ResultMeasureValue, color=~as.factor(pre_post), name="2011-2016",
+			marker = list(color = cols[[1]][[1]],size = 10,line = list(color = cols[[1]][[2]],width = 2))
+		) %>%
+		add_lines(data=pre, x=~elev_ft, y=fitted(lm(ResultMeasureValue~elev_ft, pre)), name='2011-2016 regression',
+			line = list(color = cols[[1]][[2]],width = 2)
+		) %>% 
+		add_markers(data=post, x=~elev_ft, y=~ResultMeasureValue, color=~as.factor(pre_post), name="2017-present",
+			marker = list(color = cols[[2]][[1]],size = 10,line = list(color = cols[[2]][[2]],width = 2))
+		) %>%
+		add_lines(data=post, x=~elev_ft, y=fitted(lm(ResultMeasureValue~elev_ft, post)), name='2017-present regression',
+			line = list(color = cols[[2]][[2]],width = 2)
+		) %>%	
+		layout(title = "Gilbert Bay surface salinity ~ lake elevation",
+			xaxis = list(title = "WSE (feet)"),
+			yaxis = list(side = 'left', title = 'Salinity (g/L)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+sal_elev_plot_lt
+```
+
+
+

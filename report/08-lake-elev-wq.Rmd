@@ -13,20 +13,31 @@ wq_data_flat_elev=wq_data_flat_elev[wq_data_flat_elev$rel_depth=='Surface' & !is
 
 ## Salinity on elevation
 ```{r, sal_elev_plot}
+wq_data_flat_elev$year=lubridate::year(wq_data_flat_elev$sample_dt)
+wq_data_flat_elev$pre_post=ifelse(wq_data_flat_elev$year>=2017, "post", "pre")
+pre=subset(wq_data_flat_elev, pre_post=="pre" & variable=='Salinity_gL' & Bay=='Gilbert')
+post=subset(wq_data_flat_elev, pre_post=="post" & variable=='Salinity_gL' & Bay=='Gilbert')
+sal_elev_data=rbind(pre, post)
+
 sal_elev_plot=
-	plot_ly(data=wq_data_flat_elev[wq_data_flat_elev$variable=='Salinity_gL',]) %>% 
-		add_markers(x=~elev_ft, y=~value, name='Salinity',
-			marker = list(color = cols[[1]][[1]],size = 10,line = list(color = cols[[1]][[2]],width = 2))
+	plot_ly() %>% 
+		add_markers(data=pre, x=~elev_ft, y=~value, color=~as.factor(pre_post), name="2010-2016",
+			marker = list(color = cols[[3]][[1]],size = 10,line = list(color = cols[[3]][[2]],width = 2))
+		) %>%
+		add_lines(data=pre, x=~elev_ft, y=fitted(lm(value~elev_ft, pre)), name='2010-2016 regression',
+			line = list(color = cols[[3]][[2]],width = 2)
 		) %>% 
-		add_lines(x=~elev_ft, y=fitted(lm(value~elev_ft, wq_data_flat_elev[wq_data_flat_elev$variable=='Salinity_gL',])), name='Salinity regression',
-			line = list(color = cols[[1]][[2]],width = 2)
+		add_markers(data=post, x=~elev_ft, y=~value, color=~as.factor(pre_post), name="2017-present",
+			marker = list(symbol=2, color = cols[[6]][[1]],size = 10,line = list(color = cols[[6]][[2]],width = 2))
+		) %>%
+		add_lines(data=post, x=~elev_ft, y=fitted(lm(value~elev_ft, post)), name='2017-present regression',
+			line = list(color = cols[[6]][[2]],width = 2)
 		) %>%	
-		layout(title = "Surface salinity ~ lake elevation",
-			boxmode = "group",
-			xaxis = list(title = "Gilbert Bay elevation (feet)"),
+		layout(title = "Gilbert Bay surface salinity ~ lake elevation",
+			xaxis = list(title = "WSE (feet)"),
 			yaxis = list(side = 'left', title = 'Salinity (g/L)')
 		) %>% 
-		config(displaylogo = FALSE, collaborate = FALSE,
+		config(displaylogo = FALSE,
 			modeBarButtonsToRemove = c(
 				'sendDataToCloud',
 				'hoverClosestCartesian',
@@ -36,6 +47,74 @@ sal_elev_plot=
 			)
 		)
 sal_elev_plot
+```
+
+## Density on elevation
+```{r, dens_elev_plot}
+pre=subset(wq_data_flat_elev, pre_post=="pre" & variable=='Density_gcm3' & Bay=='Gilbert')
+post=subset(wq_data_flat_elev, pre_post=="post" & variable=='Density_gcm3' & Bay=='Gilbert')
+dens_elev_plot=
+	plot_ly() %>% 
+		add_markers(data=pre, x=~elev_ft, y=~value, color=~as.factor(pre_post), name="2010-2016",
+			marker = list(color = cols[[3]][[1]],size = 10,line = list(color = cols[[3]][[2]],width = 2))
+		) %>%
+		add_lines(data=pre, x=~elev_ft, y=fitted(lm(value~elev_ft, pre)), name='2010-2016 regression',
+			line = list(color = cols[[3]][[2]],width = 2)
+		) %>% 
+		add_markers(data=post, x=~elev_ft, y=~value, color=~as.factor(pre_post), name="2017-present",
+			marker = list(symbol=2, color = cols[[6]][[1]],size = 10,line = list(color = cols[[6]][[2]],width = 2))
+		) %>%
+		add_lines(data=post, x=~elev_ft, y=fitted(lm(value~elev_ft, post)), name='2017-present regression',
+			line = list(color = cols[[6]][[2]],width = 2)
+		) %>%	
+		layout(title = "Gilbert Bay surface density ~ lake elevation",
+			xaxis = list(title = "WSE (feet)"),
+			yaxis = list(side = 'left', title = 'Density (g/cm3)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+dens_elev_plot
+```
+
+## Specific conductance on elevation
+```{r, sc_elev_plot}
+pre=subset(wq_data_flat_elev, pre_post=="pre" & variable=='SpecCond_uScm' & Bay=='Gilbert')
+post=subset(wq_data_flat_elev, pre_post=="post" & variable=='SpecCond_uScm' & Bay=='Gilbert')
+sc_elev_plot=
+	plot_ly() %>% 
+		add_markers(data=pre, x=~elev_ft, y=~value, color=~as.factor(pre_post), name="2010-2016",
+			marker = list(color = cols[[3]][[1]],size = 10,line = list(color = cols[[3]][[2]],width = 2))
+		) %>%
+		add_lines(data=pre, x=~elev_ft, y=fitted(lm(value~elev_ft, pre)), name='2010-2016 regression',
+			line = list(color = cols[[3]][[2]],width = 2)
+		) %>% 
+		add_markers(data=post, x=~elev_ft, y=~value, color=~as.factor(pre_post), name="2017-present",
+			marker = list(symbol=2, color = cols[[6]][[1]],size = 10,line = list(color = cols[[6]][[2]],width = 2))
+		) %>%
+		add_lines(data=post, x=~elev_ft, y=fitted(lm(value~elev_ft, post)), name='2017-present regression',
+			line = list(color = cols[[6]][[2]],width = 2)
+		) %>%	
+		layout(title = "Gilbert Bay surface specific conductance ~ lake elevation",
+			xaxis = list(title = "WSE (feet)"),
+			yaxis = list(side = 'left', title = 'Specific conductance (uS/cm)')
+		) %>% 
+		config(displaylogo = FALSE,
+			modeBarButtonsToRemove = c(
+				'sendDataToCloud',
+				'hoverClosestCartesian',
+				'hoverCompareCartesian',
+				'lasso2d',
+				'select2d'
+			)
+		)
+sc_elev_plot
 ```
 
 ## Phosphorus on elevation

@@ -44,7 +44,9 @@ wq_data=dataRetrieval::readNWISqw(expanded=F,tz="America/Denver",startDate="01-0
 			"62854",
 			"62855",
 			"70305",
-			"00480")
+			"00480",
+			"72263",
+			"00095")
 )
 
 wq_data=dplyr::rename(wq_data,
@@ -54,7 +56,9 @@ wq_data=dplyr::rename(wq_data,
 	Chlorophyll_a_ugL=p32209,
 	Filtered_nitrogen_mgL=p62854,
 	Total_nitrogen_mgL=p62855,
-	Salinity_gL=p70305)#,
+	Salinity_gL=p70305,
+	Density_gcm3=p72263,
+	SpecCond_uScm=p00095)
 ```
 
 ***Note - removing a few anomolously high data points TP > 8 & TN > 40. These appeared to be outliers based on figures in previous versions.
