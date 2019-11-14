@@ -6,7 +6,7 @@ fig_caption: yes
 
 ```{r, echo=T, eval=T}
 	save(site_map,elev_plot,disch_boxplot,disch_ts,mon_inflow,gsl_sal_ts,sal_boxplot_month,gsl_nuts_ts,nuts_boxplot_month,gsl_chl_ts,
-		chla_boxplot_month,sal_boxplot_bay,nuts_boxplot_bay,chla_boxplot_bay,wq_map,bs_ts,sal_elev_plot,dens_elev_plot,sc_elev_plot, sal_elev_data, 
+		chla_boxplot_month,sal_boxplot_bay,nuts_boxplot_bay,chla_boxplot_bay,wq_map,bs_ts,sal_elev_plot,dens_elev_plot,sc_elev_plot, sal_elev_data, wq_data_flat_elev,
 		p_elev_plot,n_elev_plot, jvl_dn_comp, wq_data_flat, gb_elev_vol, gb_pool_data,
 		tp_lt_ts, tn_lt_ts, chla_lt_ts, salt_lt_ts, tn_mass_plot, fn_mass_plot, tp_mass_plot, fp_mass_plot, salt_mass_plot, chla_mass_plot, sal_boxplot_site,
 		tn_load_plot, dn_load_plot, tp_load_plot, dp_load_plot, trib_wq_tp, trib_wq_tn, trib_wq_yr_tp, trib_wq_yr_tn,
