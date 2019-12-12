@@ -7,8 +7,8 @@ elevation=merge(elevation, site_list, by.x="site_no", by.y="SiteNumber", all.x=T
 
 elev_plot=
 	plot_ly(elevation) %>%
-		add_lines(data=subset(elevation, Bay=="Gilbert"), y=~elev_ft, x=~Date, name=~"Gilbert") %>%
-		add_lines(data=subset(elevation, Bay=="Gunnison"), y=~elev_ft, x=~Date, name=~"Gunnison", line=list(dash="dot")) %>%
+		add_lines(data=subset(elevation, Bay=="Gilbert"), y=~elev_ft, x=~Date, name=~"Gilbert", yaxis = "y2") %>%
+		add_lines(data=subset(elevation, Bay=="Gunnison"), y=~elev_ft, x=~Date, name=~"Gunnison", line=list(dash="dot"), yaxis = "y2") %>%
 		layout(title = "GSL Water surface elevation",
 			xaxis = list(title = ""),
 			yaxis = list(title = 'WSE (feet)')
